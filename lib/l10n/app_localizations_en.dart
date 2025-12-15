@@ -25,4 +25,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get systemTheme => 'System';
+
+  @override
+  String get loginTitle => 'Login';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get loginButton => 'Sign In';
+
+  @override
+  String get welcomeMessage => 'Welcome back!';
 }

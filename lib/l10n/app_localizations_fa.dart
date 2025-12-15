@@ -25,4 +25,19 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get systemTheme => 'سیستەم';
+
+  @override
+  String get loginTitle => 'چوونەژوورەوە';
+
+  @override
+  String get username => 'ناوى بەکارهێنەر';
+
+  @override
+  String get password => 'وشەی نهێنی';
+
+  @override
+  String get loginButton => 'چوونە ژوورەوە';
+
+  @override
+  String get welcomeMessage => 'بەخێربێیتەوە!';
 }

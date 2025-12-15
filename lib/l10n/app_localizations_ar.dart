@@ -25,4 +25,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get systemTheme => 'النظام';
+
+  @override
+  String get loginTitle => 'تسجيل الدخول';
+
+  @override
+  String get username => 'اسم المستخدم';
+
+  @override
+  String get password => 'كلمة المرور';
+
+  @override
+  String get loginButton => 'دخول';
+
+  @override
+  String get welcomeMessage => 'مرحباً بعودتك!';
 }

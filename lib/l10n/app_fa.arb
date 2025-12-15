@@ -5,5 +5,10 @@
   "language": "زمان",
   "lightTheme": "ڕۆشن",
   "darkTheme": "تاریک",
-  "systemTheme": "سیستەم"
+  "systemTheme": "سیستەم",
+  "loginTitle": "چوونەژوورەوە",
+  "username": "ناوى بەکارهێنەر",
+  "password": "وشەی نهێنی",
+  "loginButton": "چوونە ژوورەوە",
+  "welcomeMessage": "بەخێربێیتەوە!"
 }

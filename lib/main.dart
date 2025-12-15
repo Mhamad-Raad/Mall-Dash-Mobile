@@ -6,7 +6,7 @@ import 'l10n/app_localizations.dart';
 import 'src/core/providers/shared_preferences_provider.dart';
 import 'src/core/providers/theme_provider.dart';
 import 'src/core/providers/localization_provider.dart';
-import 'src/core/pages/home_page.dart';
+import 'src/core/pages/login_page.dart';
 import 'src/core/theme/custom_theme_extension.dart';
 
 void main() async {
@@ -46,7 +46,7 @@ class MyApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en'), Locale('ar'), Locale('fa')],
-      home: const HomePage(),
+      home: const LoginPage(),
     );
   }
 }
