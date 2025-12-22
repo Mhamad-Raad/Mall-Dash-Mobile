@@ -6,7 +6,7 @@ import 'l10n/app_localizations.dart';
 import 'src/core/providers/shared_preferences_provider.dart';
 import 'src/core/providers/theme_provider.dart';
 import 'src/core/providers/localization_provider.dart';
-import 'src/core/pages/login_page.dart';
+import 'src/features/auth/presentation/login_page.dart';
 import 'src/core/theme/custom_theme_extension.dart';
 
 void main() async {
