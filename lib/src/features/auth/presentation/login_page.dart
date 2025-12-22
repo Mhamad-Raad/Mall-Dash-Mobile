@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../core/widgets/language_selector.dart';
+import '../../../core/presentation/main_scaffold.dart';
 import 'login_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -32,18 +33,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.listen(loginControllerProvider, (previous, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+          SnackBar(content: Text(next.error.toString()), backgroundColor: Theme.of(context).colorScheme.error),
         );
-      } else if (next is AsyncData && next.value == null && previous is AsyncLoading) {
-         // Login successful (since we return void/null on success and don't have navigation yet)
-         // But actually the controller prints the response.
-         // If we had navigation, we would do it here.
-         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Login Request Completed')),
-         );
+      } else if (next is AsyncData && !next.isLoading) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScaffold()));
       }
     });
 
@@ -63,11 +56,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.lock_person,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  Icon(Icons.lock_person, size: 80, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(height: 32),
                   Text(
                     l10n?.welcomeMessage ?? 'Welcome back!',
@@ -115,21 +104,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             if (_formKey.currentState!.validate()) {
                               ref
                                   .read(loginControllerProvider.notifier)
-                                  .login(
-                                    email: _usernameController.text,
-                                    password: _passwordController.text,
-                                  );
+                                  .login(email: _usernameController.text, password: _passwordController.text);
                             }
                           },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
+                    style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                     child: loginState.isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                         : Text(l10n?.loginButton ?? 'Sign In'),
                   ),
                 ],
