@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../core/widgets/language_selector.dart';
-import '../../../core/presentation/main_scaffold.dart';
+import 'auth_notifier.dart';
 import 'login_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -36,7 +36,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           SnackBar(content: Text(next.error.toString()), backgroundColor: Theme.of(context).colorScheme.error),
         );
       } else if (next is AsyncData && !next.isLoading) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScaffold()));
+        // Notify AuthNotifier that we are authenticated
+        ref.read(authNotifierProvider.notifier).setAuthenticated();
+        // Navigation is handled by AuthWidget switching the widget tree,
+        // but for good measure (and to avoid "Pop" issues if we were pushed),
+        // we rely on AuthWidget which is the root.
+        // However, if LoginPage was PUSHED (e.g. after logout), we might need to pop?
+        // In our current setup, AuthWidget is the root. So when state changes, it rebuilds to MainScaffold.
       }
     });
 
