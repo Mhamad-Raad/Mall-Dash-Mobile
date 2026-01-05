@@ -46,4 +46,18 @@ class AuthRepository {
       rethrow;
     }
   }
+
+  Future<void> logout() async {
+    try {
+      await _dio.post('/Account/logout/mobile');
+      await _tokenStorage.clearTokens();
+    } on DioException catch (e) {
+      // Even if backend call fails, clear local tokens
+      await _tokenStorage.clearTokens();
+      throw Exception('Logout failed: ${e.message}');
+    } catch (e) {
+      await _tokenStorage.clearTokens();
+      rethrow;
+    }
+  }
 }

@@ -36,8 +36,8 @@ final dioProvider = Provider<Dio>((ref) {
               );
 
               final response = await refreshDio.post(
-                '/Account/refresh-token',
-                data: {'accessToken': accessToken, 'refreshToken': refreshToken},
+                '/Account/Mobile/refresh',
+                data: {'refreshToken': refreshToken},
               );
 
               if (response.statusCode == 200) {
