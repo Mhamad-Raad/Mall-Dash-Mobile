@@ -9,14 +9,12 @@ class OrdersPage extends ConsumerWidget {
 
   Color _getStatusColor(int status) {
     switch (status) {
-      case 0: // Pending
+      case 1: // Pending
         return Colors.orange;
-      case 1: // Confirmed
+      case 2: // Confirmed
         return Colors.blue;
-      case 2: // Preparing
+      case 3: // Preparing
         return Colors.purple;
-      case 3: // Ready
-        return Colors.teal;
       case 4: // OutForDelivery
         return Colors.indigo;
       case 5: // Delivered

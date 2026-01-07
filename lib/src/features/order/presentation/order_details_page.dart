@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/order_model.dart';
 import '../data/order_repository.dart';
+import 'orders_notifier.dart';
 
 final orderDetailsProvider = FutureProvider.family<Order, int>((ref, orderId) async {
   final repository = ref.watch(orderRepositoryProvider);
@@ -15,13 +16,12 @@ class OrderDetailsPage extends ConsumerWidget {
 
   Color _getStatusColor(int status) {
     switch (status) {
-      case 0: return Colors.orange;
-      case 1: return Colors.blue;
-      case 2: return Colors.purple;
-      case 3: return Colors.teal;
-      case 4: return Colors.indigo;
-      case 5: return Colors.green;
-      case 6: return Colors.red;
+      case 1: return Colors.orange;  // Pending
+      case 2: return Colors.blue;     // Confirmed
+      case 3: return Colors.purple;   // Preparing
+      case 4: return Colors.indigo;   // OutForDelivery
+      case 5: return Colors.green;    // Delivered
+      case 6: return Colors.red;      // Cancelled
       default: return Colors.grey;
     }
   }
@@ -36,7 +36,7 @@ class OrderDetailsPage extends ConsumerWidget {
       ),
       body: orderState.when(
         data: (order) {
-          final canCancel = order.status < 2; // Can cancel if Pending or Confirmed
+          final canCancel = order.status <= 2; // Can cancel if Pending (1) or Confirmed (2)
 
           return SingleChildScrollView(
             child: Column(
@@ -302,6 +302,9 @@ class OrderDetailsPage extends ConsumerWidget {
                                     
                                     // Refresh the order details
                                     ref.invalidate(orderDetailsProvider(orderId));
+                                    
+                                    // Refresh the orders list
+                                    ref.invalidate(ordersProvider);
                                     
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(

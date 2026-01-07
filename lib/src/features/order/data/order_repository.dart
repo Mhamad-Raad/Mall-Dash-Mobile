@@ -134,19 +134,33 @@ class OrderRepository {
 
   Future<void> cancelOrder(int id) async {
     try {
+      print('Attempting to cancel order ID: $id');
       final response = await _dio.post('/Order/$id/cancel');
+      print('Cancel order response status: ${response.statusCode}');
+      print('Cancel order response data: ${response.data}');
 
       if (response.statusCode != 200) {
         throw Exception('Failed to cancel order: ${response.statusCode}');
       }
+      
+      print('Order $id cancelled successfully');
     } on DioException catch (e) {
+      print('DioException cancelling order: ${e.response?.statusCode} - ${e.response?.data}');
       if (e.response?.statusCode == 400) {
-        throw Exception('Cannot cancel this order. It may already be in progress.');
+        final errorData = e.response?.data;
+        String errorMessage = 'Cannot cancel this order.';
+        
+        if (errorData is Map<String, dynamic>) {
+          errorMessage = errorData['error'] ?? errorData['message'] ?? errorMessage;
+        }
+        
+        throw Exception(errorMessage);
       } else if (e.response?.statusCode == 404) {
         throw Exception('Order not found');
       }
       throw Exception('Failed to cancel order: ${e.response?.statusCode ?? e.message}');
     } catch (e) {
+      print('Error cancelling order: $e');
       rethrow;
     }
   }

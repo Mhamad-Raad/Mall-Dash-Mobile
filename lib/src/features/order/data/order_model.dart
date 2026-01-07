@@ -86,14 +86,12 @@ class Order {
 
   static String _getStatusName(int status) {
     switch (status) {
-      case 0:
-        return 'Pending';
       case 1:
-        return 'Confirmed';
+        return 'Pending';
       case 2:
-        return 'Preparing';
+        return 'Confirmed';
       case 3:
-        return 'Ready';
+        return 'Preparing';
       case 4:
         return 'OutForDelivery';
       case 5:
