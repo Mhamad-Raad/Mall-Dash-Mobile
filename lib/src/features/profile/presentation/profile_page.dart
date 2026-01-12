@@ -1,25 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_notifier.dart';
+import '../../support/presentation/support_tickets_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.person, size: 100, color: Colors.grey),
-          const SizedBox(height: 24),
-          const Text(
-            'Profile Page',
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Profile Header
+        const SizedBox(height: 20),
+        const Center(
+          child: Icon(Icons.person, size: 80, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        const Center(
+          child: Text(
+            'My Profile',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 48),
-          ElevatedButton.icon(
-            onPressed: () async {
+        ),
+        const SizedBox(height: 32),
+
+        // Menu Items
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.support_agent, color: Colors.blue),
+                title: const Text('Support Tickets'),
+                subtitle: const Text('Get help and track your requests'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SupportTicketsPage(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.settings, color: Colors.grey),
+                title: const Text('Settings'),
+                subtitle: const Text('App preferences'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // Navigate to settings (if implemented)
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Settings coming soon')),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Logout Button
+        Card(
+          color: Colors.red[50],
+          child: ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
               final shouldLogout = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -32,6 +83,7 @@ class ProfilePage extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
                       child: const Text('Logout'),
                     ),
                   ],
@@ -43,7 +95,10 @@ class ProfilePage extends ConsumerWidget {
                   await ref.read(authNotifierProvider.notifier).logout();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Logged out successfully')),
+                      const SnackBar(
+                        content: Text('Logged out successfully'),
+                        backgroundColor: Colors.green,
+                      ),
                     );
                   }
                 } catch (e) {
@@ -58,16 +113,9 @@ class ProfilePage extends ConsumerWidget {
                 }
               }
             },
-            icon: const Icon(Icons.logout),
-            label: const Text('Logout'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
