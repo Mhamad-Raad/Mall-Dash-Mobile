@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_notifier.dart';
 import '../../support/presentation/support_tickets_page.dart';
+import 'view_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -19,7 +20,7 @@ class ProfilePage extends ConsumerWidget {
         const SizedBox(height: 16),
         const Center(
           child: Text(
-            'My Profile',
+            'My Account',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
@@ -30,7 +31,22 @@ class ProfilePage extends ConsumerWidget {
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.support_agent, color: Colors.blue),
+                leading: const Icon(Icons.person_outline, color: Colors.blue),
+                title: const Text('Profile Information'),
+                subtitle: const Text('View and edit your details'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ViewProfilePage(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.support_agent, color: Colors.green),
                 title: const Text('Support Tickets'),
                 subtitle: const Text('Get help and track your requests'),
                 trailing: const Icon(Icons.chevron_right),
