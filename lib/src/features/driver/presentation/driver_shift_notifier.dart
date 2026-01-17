@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/driver_shift_model.dart';
 import '../data/driver_shift_repository.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../notifications/data/driver_notification_service.dart';
 import 'package:dio/dio.dart';
 
 final driverShiftRepositoryProvider = Provider<DriverShiftRepository>((ref) {
@@ -41,6 +42,10 @@ class DriverShiftNotifier extends AsyncNotifier<DriverShift> {
       // Refresh queue position after starting shift
       ref.invalidate(queuePositionProvider);
 
+      // Start notification polling (checks every 5 seconds for new orders)
+      final notificationService = ref.read(driverNotificationServiceProvider);
+      notificationService.startPolling();
+
       return shift ?? DriverShift(isActive: true, startTime: DateTime.now());
     });
   }
@@ -50,6 +55,10 @@ class DriverShiftNotifier extends AsyncNotifier<DriverShift> {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(driverShiftRepositoryProvider);
       final success = await repository.endShift();
+
+      // Stop notification polling when shift ends
+      final notificationService = ref.read(driverNotificationServiceProvider);
+      notificationService.stopPolling();
 
       if (success) {
         return DriverShift(isActive: false);

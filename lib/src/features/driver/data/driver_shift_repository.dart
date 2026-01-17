@@ -10,26 +10,78 @@ class DriverShiftRepository {
   /// POST /MalDashApi/DriverShift/start
   Future<DriverShift?> startShift() async {
     try {
-      print('Starting driver shift...');
+      print('🚀 Starting driver shift...');
+      print('🔗 Endpoint: POST /DriverShift/start');
 
       final response = await _dio.post('/DriverShift/start');
 
-      print('Start shift response status: ${response.statusCode}');
-      print('Start shift response data type: ${response.data.runtimeType}');
-      print('Start shift response data: ${response.data}');
+      print('✅ Start shift response status: ${response.statusCode}');
+      print('📦 Start shift response data type: ${response.data.runtimeType}');
+      print('📄 Start shift response data: ${response.data}');
 
-      if (response.data != null && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        print('Start shift response keys: ${data.keys.toList()}');
-        return DriverShift.fromJson(data);
+      if (response.statusCode == 200) {
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          print('🔑 Start shift response keys: ${data.keys.toList()}');
+          return DriverShift.fromJson(data);
+        }
+        // Return a default active shift if no data returned
+        return DriverShift(isActive: true, startTime: DateTime.now());
       }
-
-      // Return a default active shift if no data returned
-      return DriverShift(isActive: true, startTime: DateTime.now());
+    } on DioException catch (e) {
+      print('❌ DioException starting shift');
+      print('📊 Status code: ${e.response?.statusCode}');
+      print('📦 Error response type: ${e.response?.data.runtimeType}');
+      print('📄 Error response data: ${e.response?.data}');
+      print('💬 Error message: ${e.message}');
+      print('🔍 Request path: ${e.requestOptions.path}');
+      print('🔍 Request method: ${e.requestOptions.method}');
+      print('🔍 Request headers: ${e.requestOptions.headers}');
+      
+      if (e.response?.statusCode == 400) {
+        // Parse error message from backend
+        final errorData = e.response?.data;
+        String errorMessage = 'Failed to start shift: Validation error';
+        
+        // Try to extract detailed error message
+        if (errorData is Map) {
+          print('🔍 Error data keys: ${errorData.keys.toList()}');
+          
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'];
+            print('🔍 Validation errors: $errors');
+            errorMessage = 'Validation failed: $errors';
+          } else if (errorData.containsKey('message')) {
+            errorMessage = errorData['message'];
+          } else if (errorData.containsKey('error')) {
+            errorMessage = errorData['error'];
+          } else if (errorData.containsKey('title')) {
+            errorMessage = errorData['title'];
+          } else {
+            errorMessage = 'Validation error: $errorData';
+          }
+        } else if (errorData is String) {
+          errorMessage = errorData;
+        }
+        
+        print('⚠️ Final error message: $errorMessage');
+        throw Exception(errorMessage);
+      } else if (e.response?.statusCode == 401) {
+        throw Exception('Not authorized. Please login again.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied. Driver role required.');
+      } else if (e.response?.statusCode == 409) {
+        // Conflict - probably already has an active shift
+        throw Exception('You already have an active shift. Please end it first.');
+      }
+      
+      rethrow;
     } catch (e) {
-      print('Error starting shift: $e');
+      print('💥 Unexpected error starting shift: $e');
       rethrow;
     }
+    
+    return null;
   }
 
   /// End the current driver shift

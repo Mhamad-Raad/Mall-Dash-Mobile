@@ -311,7 +311,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: order.assignmentId != null
-                  ? () => _acceptOrder(context, ref, order.assignmentId!)
+                  ? () => _acceptOrder(context, ref, order)
                   : null,
               icon: const Icon(Icons.check),
               label: const Text('Accept'),
@@ -380,7 +380,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
   Future<void> _acceptOrder(
     BuildContext context,
     WidgetRef ref,
-    int assignmentId,
+    DriverOrder order,
   ) async {
     if (!context.mounted) return;
 
@@ -410,7 +410,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
       try {
         await ref
             .read(availableOrdersNotifierProvider.notifier)
-            .acceptOrder(assignmentId);
+            .acceptOrder(order.assignmentId!, order);
 
         if (context.mounted) {
           Navigator.pop(context);

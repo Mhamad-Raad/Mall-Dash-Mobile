@@ -21,19 +21,26 @@ class AvailableOrdersPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.shopping_bag_outlined,
+                    Icons.notifications_active_outlined,
                     size: 64,
-                    color: Colors.grey.shade400,
+                    color: Colors.blue.shade400,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No available orders',
-                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                    'Waiting for order assignments',
+                    style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Check back later for new deliveries',
+                    'Orders are automatically assigned by the system',
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'You\'ll receive a notification when an order is assigned to you',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -219,7 +226,7 @@ class _OrderCard extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: order.assignmentId != null
                           ? () =>
-                                _acceptOrder(context, ref, order.assignmentId!)
+                                _acceptOrder(context, ref, order)
                           : null,
                       icon: const Icon(Icons.check),
                       label: const Text('Accept'),
@@ -264,7 +271,7 @@ class _OrderCard extends ConsumerWidget {
   Future<void> _acceptOrder(
     BuildContext context,
     WidgetRef ref,
-    int assignmentId,
+    DriverOrder order,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -292,7 +299,7 @@ class _OrderCard extends ConsumerWidget {
       try {
         await ref
             .read(availableOrdersNotifierProvider.notifier)
-            .acceptOrder(assignmentId);
+            .acceptOrder(order.assignmentId!, order);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
