@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer' as developer;
 import '../../../core/network/dio_provider.dart';
 import 'user_profile_model.dart';
 
@@ -15,13 +16,15 @@ class UserProfileRepository {
 
   Future<UserProfile> getMyProfile() async {
     try {
-      print('Fetching user profile');
+      developer.log('Fetching user profile from backend', name: 'UserProfileRepository');
       
       final response = await _dio.get('/Account/me');
 
-      print('Profile response status: ${response.statusCode}');
-      print('Profile response data type: ${response.data.runtimeType}');
-      print('Profile response data: ${response.data}');
+      developer.log(
+        'Profile response received',
+        name: 'UserProfileRepository',
+        error: 'Status: ${response.statusCode}, Data type: ${response.data.runtimeType}',
+      );
 
       if (response.statusCode == 200) {
         if (response.data == null) {
@@ -29,29 +32,42 @@ class UserProfileRepository {
         }
 
         final data = response.data as Map<String, dynamic>;
-        print('Profile data keys: ${data.keys.toList()}');
         
         // Backend wraps the response in {user: {...}, vendorProfile: null, staffProfile: null}
         final userData = data.containsKey('user') && data['user'] != null
             ? data['user'] as Map<String, dynamic>
             : data;
         
-        print('User data keys: ${userData.keys.toList()}');
-        print('FirstName field: ${userData['firstName'] ?? userData['FirstName']}');
-        print('Email field: ${userData['email'] ?? userData['Email']}');
+        developer.log(
+          'User profile parsed',
+          name: 'UserProfileRepository',
+          error: 'Role: ${userData['role']}, Email: ${userData['email'] ?? userData['Email']}',
+        );
         
-        return UserProfile.fromJson(userData);
+        final profile = UserProfile.fromJson(userData);
+        
+        developer.log(
+          'Profile created successfully',
+          name: 'UserProfileRepository',
+          error: 'ID: ${profile.id}, Role: ${profile.role}, Email: ${profile.email}',
+        );
+        
+        return profile;
       } else {
         throw Exception('Failed to load profile: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('DioException loading profile: ${e.response?.statusCode} - ${e.response?.data}');
+      developer.log(
+        'DioException loading profile',
+        name: 'UserProfileRepository',
+        error: 'Status: ${e.response?.statusCode}, Data: ${e.response?.data}',
+      );
       if (e.response?.statusCode == 401) {
         throw Exception('Authentication required. Please log in again.');
       }
       throw Exception('Failed to load profile: ${e.response?.statusCode ?? e.message}');
     } catch (e) {
-      print('Error loading profile: $e');
+      developer.log('Error loading profile', name: 'UserProfileRepository', error: e.toString());
       rethrow;
     }
   }

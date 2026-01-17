@@ -23,18 +23,23 @@ class _AuthWidgetState extends ConsumerState<AuthWidget> {
   Widget build(BuildContext context) {
     final authStatus = ref.watch(authNotifierProvider);
 
+    // Use a key that changes with auth status to force complete rebuild
+    // This ensures navigation stack is cleared when logging in/out
+    final widgetKey = ValueKey('auth_${authStatus.name}');
+
     switch (authStatus) {
       case AuthStatus.initial:
         // You can return a splash screen here
-        return const Scaffold(
-          body: Center(
+        return Scaffold(
+          key: widgetKey,
+          body: const Center(
             child: CircularProgressIndicator(),
           ),
         );
       case AuthStatus.authenticated:
-        return const MainScaffold();
+        return MainScaffold(key: widgetKey);
       case AuthStatus.unauthenticated:
-        return const LoginPage();
+        return LoginPage(key: widgetKey);
     }
   }
 }

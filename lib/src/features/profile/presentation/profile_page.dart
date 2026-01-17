@@ -107,17 +107,32 @@ class ProfilePage extends ConsumerWidget {
               );
 
               if (shouldLogout == true && context.mounted) {
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
                 try {
                   await ref.read(authNotifierProvider.notifier).logout();
+                  
+                  // Close loading dialog
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Logged out successfully'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                    Navigator.of(context).pop();
+                  }
+                  
+                  // Pop all routes to go back to root (AuthWidget will show LoginPage)
+                  if (context.mounted) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   }
                 } catch (e) {
+                  // Close loading dialog
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                  
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

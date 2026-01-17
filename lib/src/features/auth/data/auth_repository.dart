@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer' as developer;
 import '../../../core/network/dio_provider.dart';
 import '../../../core/storage/token_storage_service.dart';
 
@@ -23,17 +24,48 @@ class AuthRepository {
     required String applicationContext,
   }) async {
     try {
+      developer.log('Attempting login for: $email', name: 'AuthRepository');
+      
       final response = await _dio.post(
         '/Account/login/mobile',
-        data: {'email': email, 'password': password, 'applicationContext': applicationContext},
+        data: {
+          'email': email,
+          'password': password,
+          'applicationContext': applicationContext,
+        },
+      );
+
+      developer.log(
+        'Login response received',
+        name: 'AuthRepository',
+        error: 'Status: ${response.statusCode}, Data type: ${response.data.runtimeType}',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data as Map<String, dynamic>;
+        
+        developer.log(
+          'Login response data',
+          name: 'AuthRepository',
+          error: 'Keys: ${data.keys.join(", ")}',
+        );
 
-        // Save tokens if they exist in the response
-        if (data.containsKey('accessToken') && data.containsKey('refreshToken')) {
-          await _tokenStorage.saveTokens(accessToken: data['accessToken'], refreshToken: data['refreshToken']);
+        // Handle different possible response formats
+        final accessToken = data['accessToken'] ?? data['access_token'];
+        final refreshToken = data['refreshToken'] ?? data['refresh_token'];
+
+        if (accessToken != null && refreshToken != null) {
+          developer.log('Saving authentication tokens', name: 'AuthRepository');
+          await _tokenStorage.saveTokens(
+            accessToken: accessToken.toString(),
+            refreshToken: refreshToken.toString(),
+          );
+        } else {
+          developer.log(
+            'Warning: Login response missing tokens',
+            name: 'AuthRepository',
+            error: 'Response: $data',
+          );
         }
 
         return data;
@@ -41,23 +73,71 @@ class AuthRepository {
         throw Exception('Login failed: ${response.statusCode} - ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception('Login failed: ${e.message}');
+      developer.log('Login failed with DioException', name: 'AuthRepository', error: e.toString());
+      
+      String errorMessage = 'Login failed';
+      if (e.response?.data != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map && errorData.containsKey('message')) {
+          errorMessage = errorData['message'];
+        } else if (errorData is String) {
+          errorMessage = errorData;
+        }
+      }
+      
+      throw Exception(errorMessage);
     } catch (e) {
+      developer.log('Login failed with exception', name: 'AuthRepository', error: e.toString());
       rethrow;
+    }
+  }
+
+  Future<bool> validateToken() async {
+    try {
+      developer.log('Validating token with backend', name: 'AuthRepository');
+      
+      final response = await _dio.post('/Account/validate-token');
+      
+      developer.log(
+        'Token validation response',
+        name: 'AuthRepository',
+        error: 'Status: ${response.statusCode}',
+      );
+      
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      developer.log(
+        'Token validation failed',
+        name: 'AuthRepository',
+        error: 'Status: ${e.response?.statusCode}, Message: ${e.message}',
+      );
+      return false;
+    } catch (e) {
+      developer.log('Token validation error', name: 'AuthRepository', error: e.toString());
+      return false;
     }
   }
 
   Future<void> logout() async {
     try {
+      developer.log('Calling backend logout endpoint', name: 'AuthRepository');
+      
       await _dio.post('/Account/logout/mobile');
-      await _tokenStorage.clearTokens();
+      
+      developer.log('Backend logout successful', name: 'AuthRepository');
     } on DioException catch (e) {
-      // Even if backend call fails, clear local tokens
-      await _tokenStorage.clearTokens();
-      throw Exception('Logout failed: ${e.message}');
+      developer.log(
+        'Backend logout failed',
+        name: 'AuthRepository',
+        error: 'Status: ${e.response?.statusCode}, Message: ${e.message}',
+      );
+      // Continue to clear local tokens even if backend call fails
     } catch (e) {
+      developer.log('Logout error', name: 'AuthRepository', error: e.toString());
+    } finally {
+      // Always clear local tokens
+      developer.log('Clearing local tokens', name: 'AuthRepository');
       await _tokenStorage.clearTokens();
-      rethrow;
     }
   }
 }
