@@ -62,23 +62,44 @@ class DriverOrdersRepository {
   /// GET /MalDashApi/Order/{id}
   Future<DriverOrder?> getOrderById(int id) async {
     try {
-      print('Getting order by ID: $id');
+      print('========================================');
+      print('🔍 FETCHING ORDER BY ID');
+      print('   Endpoint: /Order/$id');
+      print('========================================');
 
       final response = await _dio.get('/Order/$id');
 
-      print('Get order response status: ${response.statusCode}');
-      print('Get order response data type: ${response.data.runtimeType}');
-      print('Get order response data: ${response.data}');
+      print('📡 API Response:');
+      print('   Status: ${response.statusCode}');
+      print('   Data type: ${response.data.runtimeType}');
 
       if (response.data != null && response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
-        print('Order response keys: ${data.keys.toList()}');
-        return DriverOrder.fromJson(data);
+        print('   Keys: ${data.keys.toList()}');
+        print('   Full data: $data');
+
+        final order = DriverOrder.fromJson(data);
+        print('✅ Order parsed successfully:');
+        print('   ID: ${order.id}');
+        print('   Number: ${order.orderNumber}');
+        print('   Status: ${order.status} (${order.statusName})');
+        print('   Customer: ${order.customerName}');
+        print('   Phone: ${order.customerPhone}');
+        print('   Address: ${order.deliveryAddress}');
+        print('   Total: ${order.totalAmount}');
+        print('   Items count: ${order.items?.length ?? 0}');
+        print('========================================');
+        return order;
       }
 
+      print('⚠️ Response data is null or not a Map');
+      print('========================================');
       return null;
     } catch (e) {
-      print('Error getting order by ID: $e');
+      print('========================================');
+      print('❌ ERROR FETCHING ORDER $id');
+      print('   Error: $e');
+      print('========================================');
       rethrow;
     }
   }
@@ -87,22 +108,44 @@ class DriverOrdersRepository {
   /// GET /MalDashApi/Order/number/{orderNumber}
   Future<DriverOrder?> getOrderByNumber(String orderNumber) async {
     try {
-      print('Getting order by number: $orderNumber');
+      print('========================================');
+      print('🔍 FETCHING ORDER BY NUMBER');
+      print('   Endpoint: /Order/number/$orderNumber');
+      print('========================================');
 
       final response = await _dio.get('/Order/number/$orderNumber');
 
-      print('Get order by number response status: ${response.statusCode}');
-      print('Get order by number response data: ${response.data}');
+      print('📡 API Response:');
+      print('   Status: ${response.statusCode}');
+      print('   Data type: ${response.data.runtimeType}');
 
       if (response.data != null && response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
-        print('Order by number response keys: ${data.keys.toList()}');
-        return DriverOrder.fromJson(data);
+        print('   Keys: ${data.keys.toList()}');
+        print('   Full data: $data');
+
+        final order = DriverOrder.fromJson(data);
+        print('✅ Order parsed successfully:');
+        print('   ID: ${order.id}');
+        print('   Number: ${order.orderNumber}');
+        print('   Status: ${order.status} (${order.statusName})');
+        print('   Customer: ${order.customerName}');
+        print('   Phone: ${order.customerPhone}');
+        print('   Address: ${order.deliveryAddress}');
+        print('   Total: ${order.totalAmount}');
+        print('   Items count: ${order.items?.length ?? 0}');
+        print('========================================');
+        return order;
       }
 
+      print('⚠️ Response data is null or not a Map');
+      print('========================================');
       return null;
     } catch (e) {
-      print('Error getting order by number: $e');
+      print('========================================');
+      print('❌ ERROR FETCHING ORDER BY NUMBER $orderNumber');
+      print('   Error: $e');
+      print('========================================');
       rethrow;
     }
   }

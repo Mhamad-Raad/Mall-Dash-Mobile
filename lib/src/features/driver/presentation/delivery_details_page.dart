@@ -11,11 +11,19 @@ class DeliveryDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderAsync = ref.watch(orderDetailsProvider(orderId));
+    final liveOrderAsync = ref.watch(driverOrderSocketProvider(orderId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Delivery Details')),
       body: orderAsync.when(
-        data: (order) {
+        data: (initialOrder) {
+          final liveOrder = liveOrderAsync.when(
+            data: (value) => value,
+            loading: () => null,
+            error: (_, __) => null,
+          );
+
+          final order = liveOrder ?? initialOrder;
           if (order == null) {
             return Center(
               child: Column(

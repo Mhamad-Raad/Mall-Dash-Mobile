@@ -8,24 +8,13 @@ class NotificationRepository {
 
   /// Get list of notifications with pagination
   /// GET /MalDashApi/Notification?skip={skip}&take={take}
-  Future<List<AppNotification>> getNotifications({
-    int skip = 0,
-    int take = 20,
-  }) async {
+  Future<List<AppNotification>> getNotifications({int skip = 0, int take = 20}) async {
     try {
-      final response = await _dio.get(
-        '/Notification',
-        queryParameters: {
-          'skip': skip,
-          'take': take,
-        },
-      );
+      final response = await _dio.get('/Notification', queryParameters: {'skip': skip, 'take': take});
 
       if (response.statusCode == 200 && response.data != null) {
         if (response.data is List) {
-          return (response.data as List)
-              .map((json) => AppNotification.fromJson(json as Map<String, dynamic>))
-              .toList();
+          return (response.data as List).map((json) => AppNotification.fromJson(json as Map<String, dynamic>)).toList();
         }
       }
 
@@ -62,7 +51,15 @@ class NotificationRepository {
   /// POST /MalDashApi/Notification/{id}/read
   Future<bool> markAsRead(int notificationId) async {
     try {
-      final response = await _dio.post('/Notification/$notificationId/read');
+      final response = await _dio.post(
+        '/Notification/$notificationId/read',
+        options: Options(
+          validateStatus: (status) {
+            if (status == null) return false;
+            return status < 500;
+          },
+        ),
+      );
       return response.statusCode == 200;
     } catch (e) {
       print('❌ Error marking notification as read: $e');

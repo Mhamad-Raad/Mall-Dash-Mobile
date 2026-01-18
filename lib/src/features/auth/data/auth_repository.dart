@@ -96,25 +96,49 @@ class AuthRepository {
     try {
       developer.log('Validating token with backend', name: 'AuthRepository');
       
-      final response = await _dio.post('/Account/validate-token');
+      final response = await _dio.post(
+        '/Account/validate-token',
+        options: Options(
+          validateStatus: (status) {
+            if (status == null) return false;
+            return true;
+          },
+        ),
+      );
       
+      final status = response.statusCode ?? 0;
+
       developer.log(
         'Token validation response',
         name: 'AuthRepository',
-        error: 'Status: ${response.statusCode}',
+        error: 'Status: $status',
       );
-      
-      return response.statusCode == 200;
+
+      if (status == 200) {
+        return true;
+      }
+
+      if (status == 401 || status == 403) {
+        return false;
+      }
+
+      return true;
     } on DioException catch (e) {
       developer.log(
         'Token validation failed',
         name: 'AuthRepository',
         error: 'Status: ${e.response?.statusCode}, Message: ${e.message}',
       );
-      return false;
+      final status = e.response?.statusCode;
+
+      if (status == 401 || status == 403) {
+        return false;
+      }
+
+      return true;
     } catch (e) {
       developer.log('Token validation error', name: 'AuthRepository', error: e.toString());
-      return false;
+      return true;
     }
   }
 
