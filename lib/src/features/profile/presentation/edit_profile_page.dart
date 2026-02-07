@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
 import '../data/user_profile_model.dart';
 import 'user_profile_notifier.dart';
 
@@ -60,9 +62,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Profile updated successfully'),
-          backgroundColor: Colors.green,
+          backgroundColor: context.appTheme.successColor,
         ),
       );
 
@@ -73,7 +75,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: Colors.red,
+          backgroundColor: context.appTheme.errorColor,
           duration: const Duration(seconds: 4),
         ),
       );
@@ -114,7 +116,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppSpacing.allMd,
         child: Form(
           key: _formKey,
           child: Column(
@@ -126,12 +128,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundColor: Colors.grey[300],
+                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                       backgroundImage: widget.profile.profileImageUrl != null
                           ? NetworkImage(widget.profile.profileImageUrl!)
                           : null,
                       child: widget.profile.profileImageUrl == null
-                          ? Icon(Icons.person, size: 60, color: Colors.grey[600])
+                          ? Icon(Icons.person, size: 60, color: Theme.of(context).colorScheme.primary)
                           : null,
                     ),
                     Positioned(

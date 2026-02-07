@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/status_badge.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import 'driver_orders_notifier.dart';
 import 'delivery_details_page.dart';
 import '../data/driver_order_model.dart';
@@ -16,34 +22,11 @@ class AvailableOrdersPage extends ConsumerWidget {
       body: ordersState.when(
         data: (orders) {
           if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_active_outlined,
-                    size: 64,
-                    color: Colors.blue.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Waiting for order assignments',
-                    style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Orders are automatically assigned by the system',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'You\'ll receive a notification when an order is assigned to you',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.notifications_active_outlined,
+              title: 'Waiting for order assignments',
+              subtitle: 'Orders are automatically assigned by the system.\nYou\'ll receive a notification when an order is assigned to you.',
+              iconColor: Theme.of(context).colorScheme.primary,
             );
           }
 
@@ -54,7 +37,7 @@ class AvailableOrdersPage extends ConsumerWidget {
                   .refresh();
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.allMd,
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
@@ -63,33 +46,13 @@ class AvailableOrdersPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading orders',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(availableOrdersNotifierProvider.notifier).refresh();
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingIndicator(),
+        error: (error, stackTrace) => ErrorState(
+          title: 'Error loading orders',
+          message: error.toString(),
+          onRetry: () {
+            ref.read(availableOrdersNotifierProvider.notifier).refresh();
+          },
         ),
       ),
     );
@@ -103,6 +66,7 @@ class _OrderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appTheme = context.appTheme;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -116,7 +80,7 @@ class _OrderCard extends ConsumerWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.allMd,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -130,82 +94,69 @@ class _OrderCard extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(order.status),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      order.statusName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  StatusBadgeSolid(
+                    label: order.statusName,
+                    statusCode: order.status,
+                    size: StatusBadgeSize.small,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              AppSpacing.verticalGapSm,
               Row(
                 children: [
-                  const Icon(Icons.person_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.person_outline, size: AppSpacing.iconSm + 2, color: appTheme.textTertiary),
+                  AppSpacing.horizontalGapXs,
                   Text(
                     order.customerName ?? 'Customer',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, color: appTheme.textSecondary),
                   ),
                 ],
               ),
               if (order.customerPhone != null) ...[
-                const SizedBox(height: 4),
+                AppSpacing.verticalGapXxs,
                 Row(
                   children: [
-                    const Icon(Icons.phone_outlined, size: 18),
-                    const SizedBox(width: 8),
+                    Icon(Icons.phone_outlined, size: AppSpacing.iconSm + 2, color: appTheme.textTertiary),
+                    AppSpacing.horizontalGapXs,
                     Text(
                       order.customerPhone!,
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: appTheme.textSecondary),
                     ),
                   ],
                 ),
               ],
-              const SizedBox(height: 4),
+              AppSpacing.verticalGapXxs,
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.location_on_outlined, size: AppSpacing.iconSm + 2, color: appTheme.textTertiary),
+                  AppSpacing.horizontalGapXs,
                   Expanded(
                     child: Text(
                       _formatAddress(order),
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: appTheme.textSecondary),
                     ),
                   ),
                 ],
               ),
               if (order.totalAmount != null) ...[
-                const SizedBox(height: 8),
+                AppSpacing.verticalGapXs,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total Amount', style: TextStyle(fontSize: 14)),
                     Text(
                       '\$${order.totalAmount!.toStringAsFixed(2)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: appTheme.successColor,
                       ),
                     ),
                   ],
                 ),
               ],
-              const SizedBox(height: 12),
+              AppSpacing.verticalGapSm,
               Row(
                 children: [
                   Expanded(
@@ -217,11 +168,11 @@ class _OrderCard extends ConsumerWidget {
                       icon: const Icon(Icons.close),
                       label: const Text('Reject'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
+                        foregroundColor: appTheme.errorColor,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.horizontalGapSm,
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: order.assignmentId != null
@@ -230,10 +181,6 @@ class _OrderCard extends ConsumerWidget {
                           : null,
                       icon: const Icon(Icons.check),
                       label: const Text('Accept'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
                     ),
                   ),
                 ],
@@ -243,17 +190,6 @@ class _OrderCard extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 4:
-        return Colors.orange; // Ready for pickup
-      case 5:
-        return Colors.blue; // Assigned to driver
-      default:
-        return Colors.grey;
-    }
   }
 
   String _formatAddress(DriverOrder order) {
@@ -285,10 +221,6 @@ class _OrderCard extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
             child: const Text('Accept'),
           ),
         ],
@@ -302,19 +234,21 @@ class _OrderCard extends ConsumerWidget {
             .acceptOrder(order.assignmentId!, order);
 
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Order accepted successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error accepting order: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -342,7 +276,7 @@ class _OrderCard extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Colors.white,
             ),
             child: const Text('Reject'),
@@ -358,19 +292,21 @@ class _OrderCard extends ConsumerWidget {
             .rejectOrder(assignmentId);
 
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Order rejected'),
-              backgroundColor: Colors.orange,
+              backgroundColor: appTheme.warningColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error rejecting order: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }

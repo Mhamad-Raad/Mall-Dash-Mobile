@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:developer' as developer;
+import '../design/design_system.dart';
+import '../theme/custom_theme_extension.dart';
+import '../widgets/loading_indicator.dart';
+import '../widgets/error_state.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/orders/presentation/orders_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
@@ -47,25 +50,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           return _buildTenantScaffold();
         }
       },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(body: LoadingIndicator()),
       error: (error, _) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Error: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.read(userProfileProvider.notifier).refresh();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        body: ErrorState(
+          message: error.toString(),
+          onRetry: () => ref.read(userProfileProvider.notifier).refresh(),
         ),
       ),
     );
@@ -79,7 +68,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         title: const Text('Mall Dash'),
         actions: [
           IconButton(
-            icon: const FaIcon(FontAwesomeIcons.bell),
+            icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
               Navigator.push(
                 context,
@@ -90,7 +79,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             },
           ),
           IconButton(
-            icon: const FaIcon(FontAwesomeIcons.gear),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
               Navigator.push(
                 context,
@@ -110,15 +99,18 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.boxOpen),
+            icon: Icon(Icons.receipt_long_outlined),
+            activeIcon: Icon(Icons.receipt_long),
             label: 'Orders',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.house),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.user),
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],

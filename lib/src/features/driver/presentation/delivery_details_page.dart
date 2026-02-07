@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/status_badge.dart';
 import 'driver_orders_notifier.dart';
 import '../data/driver_order_model.dart';
 
@@ -26,22 +29,27 @@ class DeliveryDetailsPage extends ConsumerWidget {
           final order = liveOrder ?? initialOrder;
           if (order == null) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Order not found',
-                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-                  ),
-                ],
+              child: Builder(
+                builder: (context) {
+                  final appTheme = context.appTheme;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: appTheme.textTertiary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Order not found',
+                        style: TextStyle(fontSize: 18, color: appTheme.textSecondary),
+                      ),
+                    ],
+                  );
+                },
               ),
             );
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.allMd,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -49,7 +57,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
                 Card(
                   elevation: 4,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppSpacing.allMd,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -63,44 +71,36 @@ class DeliveryDetailsPage extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(order.status),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                order.statusName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                            StatusBadgeSolid(
+                              label: order.statusName,
+                              statusCode: order.status,
+                              size: StatusBadgeSize.medium,
                             ),
                           ],
                         ),
                         if (order.totalAmount != null) ...[
                           const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total Amount',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              Text(
-                                '\$${order.totalAmount!.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
+                          Builder(
+                            builder: (context) {
+                              final appTheme = context.appTheme;
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Total Amount',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  Text(
+                                    '\$${order.totalAmount!.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: appTheme.successColor,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ],
@@ -146,17 +146,22 @@ class DeliveryDetailsPage extends ConsumerWidget {
                                 style: const TextStyle(fontSize: 16),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.call),
-                                color: Colors.green,
-                                onPressed: () {
-                                  // TODO: Implement phone call functionality
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Call functionality coming soon',
-                                      ),
-                                    ),
+                              Builder(
+                                builder: (context) {
+                                  final appTheme = context.appTheme;
+                                  return IconButton(
+                                    icon: const Icon(Icons.call),
+                                    color: appTheme.successColor,
+                                    onPressed: () {
+                                      // TODO: Implement phone call functionality
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Call functionality coming soon',
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
                               ),
@@ -189,7 +194,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
                             ),
                             IconButton(
                               icon: const Icon(Icons.map),
-                              color: Colors.blue,
+                              color: Theme.of(context).colorScheme.primary,
                               onPressed: () {
                                 // TODO: Implement map navigation
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -271,22 +276,27 @@ class DeliveryDetailsPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading order',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: Builder(
+            builder: (context) {
+              final appTheme = context.appTheme;
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: appTheme.errorColor),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading order',
+                    style: TextStyle(fontSize: 18, color: appTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    style: TextStyle(fontSize: 14, color: appTheme.textTertiary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -300,6 +310,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
   ) {
     if (order.status == 4 || order.status == 5) {
       // Ready for pickup or assigned - show accept/reject buttons
+      final appTheme = context.appTheme;
       return Row(
         children: [
           Expanded(
@@ -310,7 +321,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
               icon: const Icon(Icons.close),
               label: const Text('Reject'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
+                foregroundColor: appTheme.errorColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
@@ -324,8 +335,6 @@ class DeliveryDetailsPage extends ConsumerWidget {
               icon: const Icon(Icons.check),
               label: const Text('Accept'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
@@ -342,7 +351,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
           icon: const Icon(Icons.local_shipping),
           label: const Text('Mark In Transit'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
@@ -350,6 +359,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
       );
     } else if (order.status == 7) {
       // In transit - show mark delivered button
+      final appTheme = context.appTheme;
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
@@ -357,7 +367,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
           icon: const Icon(Icons.check_circle),
           label: const Text('Mark Delivered'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
+            backgroundColor: appTheme.successColor,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
@@ -368,20 +378,21 @@ class DeliveryDetailsPage extends ConsumerWidget {
     return const SizedBox.shrink();
   }
 
-  Color _getStatusColor(int status) {
+  // Status colors now handled by StatusBadgeSolid widget
+  Color _getStatusColorLegacy(int status, CustomThemeExtension appTheme) {
     switch (status) {
       case 4:
-        return Colors.orange;
+        return appTheme.warningColor;
       case 5:
-        return Colors.blue;
+        return appTheme.infoColor;
       case 6:
-        return Colors.orange;
+        return appTheme.warningColor;
       case 7:
-        return Colors.blue;
+        return appTheme.infoColor;
       case 8:
-        return Colors.green;
+        return appTheme.successColor;
       default:
-        return Colors.grey;
+        return appTheme.textTertiary;
     }
   }
 
@@ -404,10 +415,6 @@ class DeliveryDetailsPage extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
             child: const Text('Accept'),
           ),
         ],
@@ -422,19 +429,21 @@ class DeliveryDetailsPage extends ConsumerWidget {
 
         if (context.mounted) {
           Navigator.pop(context);
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Order accepted successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error accepting order: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -462,7 +471,7 @@ class DeliveryDetailsPage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Colors.white,
             ),
             child: const Text('Reject'),
@@ -479,19 +488,21 @@ class DeliveryDetailsPage extends ConsumerWidget {
 
         if (context.mounted) {
           Navigator.pop(context);
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Order rejected'),
-              backgroundColor: Colors.orange,
+              backgroundColor: appTheme.warningColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error rejecting order: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -535,19 +546,21 @@ class DeliveryDetailsPage extends ConsumerWidget {
         ref.invalidate(orderDetailsProvider(orderId));
 
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Status updated to ${newStatus.displayName}'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error updating status: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -576,10 +589,6 @@ class DeliveryDetailsPage extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
             child: const Text('Complete'),
           ),
         ],
@@ -594,19 +603,21 @@ class DeliveryDetailsPage extends ConsumerWidget {
 
         if (context.mounted) {
           Navigator.pop(context);
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Delivery completed successfully!'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error completing delivery: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -628,6 +639,7 @@ class _AddressRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.appTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -641,7 +653,7 @@ class _AddressRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: appTheme.textSecondary),
                 ),
                 Text(value, style: const TextStyle(fontSize: 16)),
               ],
@@ -660,6 +672,7 @@ class _OrderItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.appTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -668,12 +681,12 @@ class _OrderItemRow extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8),
+              color: appTheme.surfaceVariant,
+              borderRadius: AppRadius.radiusSm,
             ),
             child: item.imageUrl != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppRadius.radiusSm,
                     child: Image.network(
                       item.imageUrl!,
                       fit: BoxFit.cover,
@@ -698,7 +711,7 @@ class _OrderItemRow extends StatelessWidget {
                 ),
                 Text(
                   'Qty: ${item.quantity}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: appTheme.textSecondary),
                 ),
               ],
             ),

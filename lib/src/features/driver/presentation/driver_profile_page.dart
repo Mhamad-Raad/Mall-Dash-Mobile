@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import '../../profile/presentation/user_profile_notifier.dart';
 import '../../profile/presentation/view_profile_page.dart';
 import '../../auth/presentation/auth_notifier.dart';
@@ -16,31 +19,36 @@ class DriverProfilePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Driver Profile')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.allMd,
         children: [
           // Driver Profile Information Card
           profileAsync.when(
             data: (profile) => Card(
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.allMd,
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.blue.shade100,
-                      backgroundImage: profile.profileImageUrl != null
-                          ? NetworkImage(profile.profileImageUrl!)
-                          : null,
-                      child: profile.profileImageUrl == null
-                          ? Icon(
-                              Icons.person,
-                              size: 50,
-                              color: Colors.blue.shade700,
-                            )
-                          : null,
+                    Builder(
+                      builder: (context) {
+                        final appTheme = context.appTheme;
+                        return CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                          backgroundImage: profile.profileImageUrl != null
+                              ? NetworkImage(profile.profileImageUrl!)
+                              : null,
+                          child: profile.profileImageUrl == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Theme.of(context).colorScheme.primary,
+                                )
+                              : null,
+                        );
+                      },
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.verticalGapMd,
                     Text(
                       profile.fullName,
                       style: const TextStyle(
@@ -48,26 +56,27 @@ class DriverProfilePage extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'DRIVER',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
+                    AppSpacing.verticalGapXs,
+                    Builder(
+                      builder: (context) {
+                        return Container(
+                          padding: AppSpacing.statusBadge,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                            borderRadius: AppRadius.radiusPill,
+                          ),
+                          child: Text(
+                            'DRIVER',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.verticalGapMd,
                     _InfoRow(
                       icon: Icons.email_outlined,
                       label: 'Email',
@@ -85,37 +94,47 @@ class DriverProfilePage extends ConsumerWidget {
             loading: () => const Card(
               elevation: 4,
               child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
+                padding: AppSpacing.allMd,
+                child: LoadingIndicator(),
               ),
             ),
             error: (error, _) => Card(
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.allMd,
                 child: Text('Error: $error'),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.verticalGapMd,
 
           // Current Shift Status Card
           shiftState.when(
             data: (shift) => Card(
               elevation: 4,
               child: ListTile(
-                leading: Icon(
-                  shift.isActive ? Icons.check_circle : Icons.cancel,
-                  color: shift.isActive ? Colors.green : Colors.grey,
-                  size: 32,
+                leading: Builder(
+                  builder: (context) {
+                    final appTheme = context.appTheme;
+                    return Icon(
+                      shift.isActive ? Icons.check_circle : Icons.cancel,
+                      color: shift.isActive ? appTheme.successColor : appTheme.textTertiary,
+                      size: AppSpacing.iconLg,
+                    );
+                  },
                 ),
                 title: const Text('Current Shift Status'),
-                subtitle: Text(
-                  shift.isActive ? 'Active Shift' : 'No Active Shift',
-                  style: TextStyle(
-                    color: shift.isActive ? Colors.green : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
+                subtitle: Builder(
+                  builder: (context) {
+                    final appTheme = context.appTheme;
+                    return Text(
+                      shift.isActive ? 'Active Shift' : 'No Active Shift',
+                      style: TextStyle(
+                        color: shift.isActive ? appTheme.successColor : appTheme.textTertiary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
                 trailing: shift.isActive && shift.startTime != null
                     ? Text(
@@ -128,20 +147,24 @@ class DriverProfilePage extends ConsumerWidget {
             loading: () => const Card(
               elevation: 4,
               child: ListTile(
-                leading: CircularProgressIndicator(),
+                leading: SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
                 title: Text('Loading shift status...'),
               ),
             ),
             error: (_, __) => const SizedBox.shrink(),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.verticalGapMd,
 
           // Menu Items
           const Text(
             'Account',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.verticalGapXs,
 
           Card(
             elevation: 2,
@@ -189,14 +212,14 @@ class DriverProfilePage extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          AppSpacing.verticalGapLg,
 
           // Settings
           const Text(
             'Settings',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.verticalGapXs,
 
           Card(
             elevation: 2,
@@ -245,25 +268,30 @@ class DriverProfilePage extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          AppSpacing.verticalGapLg,
 
           // Logout Button
-          Card(
-            elevation: 2,
-            color: Colors.red.shade50,
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Logout',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+          Builder(
+            builder: (context) {
+              final appTheme = context.appTheme;
+              return Card(
+                elevation: 2,
+                color: appTheme.errorColor.withOpacity(0.1),
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: appTheme.errorColor),
+                  title: Text(
+                    'Logout',
+                    style: TextStyle(
+                      color: appTheme.errorColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onTap: () => _handleDriverLogout(context, ref),
                 ),
-              ),
-              onTap: () => _handleDriverLogout(context, ref),
-            ),
+              );
+            },
           ),
-          const SizedBox(height: 16),
+          AppSpacing.verticalGapMd,
         ],
       ),
     );
@@ -302,7 +330,7 @@ class DriverProfilePage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, 'logout_anyway'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(dialogContext).colorScheme.error,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Logout Anyway'),
@@ -341,7 +369,7 @@ class DriverProfilePage extends ConsumerWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Failed to end shift: $e'),
-                backgroundColor: Colors.red,
+                backgroundColor: context.appTheme.errorColor,
               ),
             );
           }
@@ -364,7 +392,7 @@ class DriverProfilePage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Logout'),
@@ -411,7 +439,7 @@ class DriverProfilePage extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Logout failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: context.appTheme.errorColor,
           ),
         );
       }
@@ -432,19 +460,20 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.appTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: AppSpacing.verticalXs,
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
-          const SizedBox(width: 12),
+          Icon(icon, size: 20, color: appTheme.textSecondary),
+          AppSpacing.horizontalGapSm,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: appTheme.textSecondary),
                 ),
                 Text(
                   value,

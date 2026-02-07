@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import '../../vendor/presentation/vendors_notifier.dart';
 import '../../vendor/presentation/vendor_details_page.dart';
 
@@ -9,24 +14,27 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vendorsState = ref.watch(vendorsProvider);
+    final appTheme = context.appTheme;
 
     return vendorsState.when(
       data: (vendors) {
         if (vendors.isEmpty) {
-          return const Center(
-            child: Text('No vendors available'),
+          return const EmptyState(
+            icon: Icons.store_mall_directory_outlined,
+            title: 'No vendors available',
+            subtitle: 'Pull down to refresh',
           );
         }
 
         return RefreshIndicator(
           onRefresh: () => ref.read(vendorsProvider.notifier).refresh(),
           child: GridView.builder(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppSpacing.allMd,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 0.85,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
             ),
             itemCount: vendors.length,
             itemBuilder: (context, index) {
@@ -52,37 +60,43 @@ class HomePage extends ConsumerWidget {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.store, size: 64),
+                                    color: appTheme.surfaceVariant,
+                                    child: Icon(
+                                      Icons.store,
+                                      size: AppSpacing.iconHero,
+                                      color: appTheme.textTertiary,
+                                    ),
                                   );
                                 },
                               )
                             : Container(
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.store, size: 64),
+                                color: appTheme.surfaceVariant,
+                                child: Icon(
+                                  Icons.store,
+                                  size: AppSpacing.iconHero,
+                                  color: appTheme.textTertiary,
+                                ),
                               ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: AppSpacing.allXs,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               vendor.name,
-                              style: const TextStyle(
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             if (vendor.description != null) ...[
-                              const SizedBox(height: 4),
+                              AppSpacing.verticalGapXxs,
                               Text(
                                 vendor.description!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: appTheme.textSecondary,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -99,21 +113,10 @@ class HomePage extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Error: ${error.toString()}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => ref.read(vendorsProvider.notifier).refresh(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      loading: () => const LoadingIndicator(),
+      error: (error, stack) => ErrorState(
+        message: error.toString(),
+        onRetry: () => ref.read(vendorsProvider.notifier).refresh(),
       ),
     );
   }

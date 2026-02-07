@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
 import 'user_profile_notifier.dart';
 import 'edit_profile_page.dart';
 
@@ -41,7 +43,7 @@ class ViewProfilePage extends ConsumerWidget {
             onRefresh: () => ref.read(userProfileProvider.notifier).refresh(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
+              padding: AppSpacing.allMd,
               child: Column(
                 children: [
                   const SizedBox(height: 20),
@@ -49,12 +51,12 @@ class ViewProfilePage extends ConsumerWidget {
                   // Profile Image
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.grey[300],
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                     backgroundImage: profile.profileImageUrl != null
                         ? NetworkImage(profile.profileImageUrl!)
                         : null,
                     child: profile.profileImageUrl == null
-                        ? Icon(Icons.person, size: 60, color: Colors.grey[600])
+                        ? Icon(Icons.person, size: 60, color: Theme.of(context).colorScheme.primary)
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -72,15 +74,15 @@ class ViewProfilePage extends ConsumerWidget {
                   // Role Badge
                   if (profile.role != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: AppSpacing.statusBadge,
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                        borderRadius: AppRadius.radiusPill,
                       ),
                       child: Text(
                         profile.role!,
                         style: TextStyle(
-                          color: Colors.blue[700],
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w500,
                           fontSize: 13,
                         ),
@@ -90,6 +92,7 @@ class ViewProfilePage extends ConsumerWidget {
 
                   // Information Cards
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.person_outline,
                     label: 'First Name',
                     value: profile.firstName.isNotEmpty ? profile.firstName : 'Not set',
@@ -97,6 +100,7 @@ class ViewProfilePage extends ConsumerWidget {
                   const SizedBox(height: 12),
 
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.person_outline,
                     label: 'Last Name',
                     value: profile.lastName.isNotEmpty ? profile.lastName : 'Not set',
@@ -104,6 +108,7 @@ class ViewProfilePage extends ConsumerWidget {
                   const SizedBox(height: 12),
 
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.email_outlined,
                     label: 'Email',
                     value: profile.email.isNotEmpty ? profile.email : 'Not set',
@@ -111,6 +116,7 @@ class ViewProfilePage extends ConsumerWidget {
                   const SizedBox(height: 12),
 
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.phone_outlined,
                     label: 'Phone',
                     value: profile.phoneNumber.isNotEmpty ? profile.phoneNumber : 'Not set',
@@ -119,6 +125,7 @@ class ViewProfilePage extends ConsumerWidget {
 
                   if (profile.buildingName != null)
                     _buildInfoCard(
+                      context: context,
                       icon: Icons.apartment_outlined,
                       label: 'Building',
                       value: profile.buildingName!,
@@ -127,6 +134,7 @@ class ViewProfilePage extends ConsumerWidget {
 
                   if (profile.apartmentNumber != null)
                     _buildInfoCard(
+                      context: context,
                       icon: Icons.home_outlined,
                       label: 'Apartment',
                       value: profile.apartmentNumber!,
@@ -134,6 +142,7 @@ class ViewProfilePage extends ConsumerWidget {
                   if (profile.apartmentNumber != null) const SizedBox(height: 12),
 
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.badge_outlined,
                     label: 'User ID',
                     value: profile.id.length > 8 
@@ -146,51 +155,56 @@ class ViewProfilePage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 60, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading profile',
-                style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Text(
-                  error.toString().replaceAll('Exception: ', ''),
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+        error: (error, stack) {
+          final appTheme = context.appTheme;
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 60, color: appTheme.errorColor),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading profile',
+                  style: TextStyle(fontSize: 18, color: appTheme.textSecondary),
                 ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(userProfileProvider.notifier).refresh();
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Text(
+                    error.toString().replaceAll('Exception: ', ''),
+                    style: TextStyle(color: appTheme.errorColor),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref.read(userProfileProvider.notifier).refresh();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildInfoCard({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final appTheme = context.appTheme;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppSpacing.allMd,
         child: Row(
           children: [
-            Icon(icon, size: 24, color: Colors.grey[600]),
+            Icon(icon, size: 24, color: appTheme.textSecondary),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -200,7 +214,7 @@ class ViewProfilePage extends ConsumerWidget {
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: appTheme.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

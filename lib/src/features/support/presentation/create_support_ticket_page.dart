@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
 import '../data/support_ticket_model.dart';
 import '../data/support_ticket_repository.dart';
 
@@ -48,9 +50,9 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Support ticket created successfully'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Support ticket created successfully'),
+          backgroundColor: context.appTheme.successColor,
         ),
       );
 
@@ -61,7 +63,7 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: Colors.red,
+          backgroundColor: context.appTheme.errorColor,
           duration: const Duration(seconds: 4),
         ),
       );
@@ -76,12 +78,13 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.appTheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Support Ticket'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppSpacing.allMd,
         child: Form(
           key: _formKey,
           child: Column(
@@ -107,7 +110,7 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
                 },
                 maxLength: 200,
               ),
-              const SizedBox(height: 16),
+              AppSpacing.verticalGapMd,
 
               // Priority Dropdown
               DropdownButtonFormField<String>(
@@ -127,7 +130,7 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
                           height: 12,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _getPriorityColor(priority),
+                            color: _getPriorityColorFromTheme(context, priority),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -144,7 +147,7 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
                   }
                 },
               ),
-              const SizedBox(height: 16),
+              AppSpacing.verticalGapMd,
 
               // Description Field
               TextFormField(
@@ -167,23 +170,23 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              AppSpacing.verticalGapLg,
 
               // Info Card
               Card(
-                color: Colors.blue[50],
+                color: appTheme.infoContainerColor,
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: AppSpacing.allSm,
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue[700]),
-                      const SizedBox(width: 12),
+                      Icon(Icons.info_outline, color: appTheme.infoColor),
+                      AppSpacing.horizontalGapSm,
                       Expanded(
                         child: Text(
                           'Our support team will review your ticket and respond as soon as possible.',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.blue[900],
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -191,7 +194,7 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              AppSpacing.verticalGapLg,
 
               // Submit Button
               SizedBox(
@@ -227,18 +230,19 @@ class _CreateSupportTicketPageState extends ConsumerState<CreateSupportTicketPag
     );
   }
 
-  Color _getPriorityColor(String priority) {
+  Color _getPriorityColorFromTheme(BuildContext context, String priority) {
+    final appTheme = context.appTheme;
     switch (priority) {
       case 'Low':
-        return Colors.green;
+        return appTheme.successColor;
       case 'Normal':
-        return Colors.blue;
+        return appTheme.infoColor;
       case 'High':
-        return Colors.orange;
+        return appTheme.warningColor;
       case 'Urgent':
-        return Colors.red;
+        return appTheme.errorColor;
       default:
-        return Colors.grey;
+        return appTheme.textTertiary;
     }
   }
 }

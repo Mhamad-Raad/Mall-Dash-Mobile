@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
 import '../data/order_model.dart';
 import '../data/order_repository.dart';
 import 'orders_notifier.dart';
@@ -14,15 +16,16 @@ class OrderDetailsPage extends ConsumerWidget {
 
   const OrderDetailsPage({super.key, required this.orderId});
 
-  Color _getStatusColor(int status) {
+  Color _getStatusColor(BuildContext context, int status) {
+    final appTheme = context.appTheme;
     switch (status) {
-      case 1: return Colors.orange;  // Pending
-      case 2: return Colors.blue;     // Confirmed
-      case 3: return Colors.purple;   // Preparing
-      case 4: return Colors.indigo;   // OutForDelivery
-      case 5: return Colors.green;    // Delivered
-      case 6: return Colors.red;      // Cancelled
-      default: return Colors.grey;
+      case 1: return appTheme.warningColor;       // Pending
+      case 2: return appTheme.infoColor;          // Confirmed
+      case 3: return appTheme.orderPreparingColor; // Preparing
+      case 4: return appTheme.orderOutForDeliveryColor; // OutForDelivery
+      case 5: return appTheme.successColor;       // Delivered
+      case 6: return appTheme.errorColor;         // Cancelled
+      default: return appTheme.textTertiary;
     }
   }
 
@@ -60,13 +63,10 @@ class OrderDetailsPage extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
+                            padding: AppSpacing.statusBadge,
                             decoration: BoxDecoration(
-                              color: _getStatusColor(order.status),
-                              borderRadius: BorderRadius.circular(12),
+                              color: _getStatusColor(context, order.status),
+                              borderRadius: AppRadius.radiusMd,
                             ),
                             child: Text(
                               order.statusName,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../core/design/design_system.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../core/widgets/language_selector.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import 'auth_notifier.dart';
 import 'login_controller.dart';
 
@@ -53,7 +55,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: AppSpacing.allLg,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: Form(
@@ -62,20 +64,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.lock_person, size: 80, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(height: 32),
+                  Icon(
+                    Icons.lock_person,
+                    size: AppSpacing.iconAvatar,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  AppSpacing.verticalGapXl,
                   Text(
                     l10n?.welcomeMessage ?? 'Welcome back!',
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  AppSpacing.verticalGapXl,
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
                       labelText: l10n?.username ?? 'Username',
                       prefixIcon: const Icon(Icons.person),
-                      border: const OutlineInputBorder(),
                     ),
                     enabled: !loginState.isLoading,
                     validator: (value) {
@@ -85,13 +90,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.verticalGapMd,
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       labelText: l10n?.password ?? 'Password',
                       prefixIcon: const Icon(Icons.lock),
-                      border: const OutlineInputBorder(),
                     ),
                     obscureText: true,
                     enabled: !loginState.isLoading,
@@ -102,7 +106,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
+                  AppSpacing.verticalGapLg,
                   FilledButton(
                     onPressed: loginState.isLoading
                         ? null
@@ -113,9 +117,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   .login(email: _usernameController.text, password: _passwordController.text);
                             }
                           },
-                    style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                     child: loginState.isLoading
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const LoadingIndicatorSmall()
                         : Text(l10n?.loginButton ?? 'Sign In'),
                   ),
                 ],

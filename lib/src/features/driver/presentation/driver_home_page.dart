@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import 'driver_shift_notifier.dart';
 import 'driver_orders_notifier.dart';
 import 'available_orders_page.dart';
@@ -40,13 +43,13 @@ class DriverHomePage extends ConsumerWidget {
           await ref.read(activeDeliveriesNotifierProvider.notifier).refresh();
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.allMd,
           children: [
             // Shift Status Card
             Card(
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.allMd,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -60,48 +63,51 @@ class DriverHomePage extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        shiftState.when(
-                          data: (shift) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: shift.isActive
-                                  ? Colors.green
-                                  : Colors.grey,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              shift.isActive ? 'ACTIVE' : 'INACTIVE',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                        Builder(
+                          builder: (context) {
+                            final appTheme = context.appTheme;
+                            return shiftState.when(
+                              data: (shift) => Container(
+                                padding: AppSpacing.statusBadge,
+                                decoration: BoxDecoration(
+                                  color: shift.isActive
+                                      ? appTheme.successColor
+                                      : appTheme.textTertiary,
+                                  borderRadius: AppRadius.radiusPill,
+                                ),
+                                child: Text(
+                                  shift.isActive ? 'ACTIVE' : 'INACTIVE',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          loading: () => const CircularProgressIndicator(),
-                          error: (_, __) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              'ERROR',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                              loading: () => const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               ),
-                            ),
-                          ),
+                              error: (_, __) => Container(
+                                padding: AppSpacing.statusBadge,
+                                decoration: BoxDecoration(
+                                  color: appTheme.errorColor,
+                                  borderRadius: AppRadius.radiusPill,
+                                ),
+                                child: const Text(
+                                  'ERROR',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.verticalGapMd,
                     shiftState.when(
                       data: (shift) => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +117,7 @@ class DriverHomePage extends ConsumerWidget {
                               'Started: ${_formatTime(shift.startTime!)}',
                               style: const TextStyle(fontSize: 14),
                             ),
-                            const SizedBox(height: 8),
+                            AppSpacing.verticalGapXs,
                           ],
                           SizedBox(
                             width: double.infinity,
@@ -131,29 +137,28 @@ class DriverHomePage extends ConsumerWidget {
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: shift.isActive
-                                    ? Colors.red
-                                    : Colors.green,
+                                    ? Theme.of(context).extension<CustomThemeExtension>()!.errorColor
+                                    : Theme.of(context).extension<CustomThemeExtension>()!.successColor,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
+                                padding: AppSpacing.verticalSm,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (error, _) => Text(
-                        'Error: $error',
-                        style: const TextStyle(color: Colors.red),
+                      loading: () => const LoadingIndicator(),
+                      error: (error, _) => Builder(
+                        builder: (context) => Text(
+                          'Error: $error',
+                          style: TextStyle(color: context.appTheme.errorColor),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalGapMd,
 
             // Queue Position Card
             queuePositionAsync.when(
@@ -162,7 +167,7 @@ class DriverHomePage extends ConsumerWidget {
                   return Card(
                     elevation: 4,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppSpacing.allMd,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -173,16 +178,18 @@ class DriverHomePage extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          AppSpacing.verticalGapXs,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                '#${position.position}',
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                              Builder(
+                                builder: (context) => Text(
+                                  '#${position.position}',
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
                                 ),
                               ),
                               if (position.totalDrivers > 0)
@@ -202,13 +209,13 @@ class DriverHomePage extends ConsumerWidget {
               loading: () => const Card(
                 elevation: 4,
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
+                  padding: AppSpacing.allMd,
+                  child: LoadingIndicator(),
                 ),
               ),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalGapMd,
 
             // Available Orders Card
             Card(
@@ -223,22 +230,27 @@ class DriverHomePage extends ConsumerWidget {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppSpacing.allMd,
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.orange.shade700,
-                          size: 32,
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final appTheme = context.appTheme;
+                          return Container(
+                            padding: AppSpacing.allSm,
+                            decoration: BoxDecoration(
+                              color: appTheme.warningColor.withOpacity(0.15),
+                              borderRadius: AppRadius.radiusMd,
+                            ),
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              color: appTheme.warningColor,
+                              size: AppSpacing.iconLg,
+                            ),
+                          );
+                        },
                       ),
-                      const SizedBox(width: 16),
+                      AppSpacing.horizontalGapMd,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,13 +262,15 @@ class DriverHomePage extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            AppSpacing.verticalGapXxs,
                             availableOrdersState.when(
-                              data: (orders) => Text(
-                                '${orders.length} order${orders.length != 1 ? 's' : ''} waiting',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
+                              data: (orders) => Builder(
+                                builder: (context) => Text(
+                                  '${orders.length} order${orders.length != 1 ? 's' : ''} waiting',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: context.appTheme.textSecondary,
+                                  ),
                                 ),
                               ),
                               loading: () => const Text('Loading...'),
@@ -271,7 +285,7 @@ class DriverHomePage extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            AppSpacing.verticalGapSm,
 
             // Active Deliveries Card
             Card(
@@ -286,22 +300,27 @@ class DriverHomePage extends ConsumerWidget {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppSpacing.allMd,
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.local_shipping_outlined,
-                          color: Colors.blue.shade700,
-                          size: 32,
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final appTheme = context.appTheme;
+                          return Container(
+                            padding: AppSpacing.allSm,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                              borderRadius: AppRadius.radiusMd,
+                            ),
+                            child: Icon(
+                              Icons.local_shipping_outlined,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: AppSpacing.iconLg,
+                            ),
+                          );
+                        },
                       ),
-                      const SizedBox(width: 16),
+                      AppSpacing.horizontalGapMd,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,13 +332,15 @@ class DriverHomePage extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            AppSpacing.verticalGapXxs,
                             activeDeliveriesState.when(
-                              data: (deliveries) => Text(
-                                '${deliveries.length} active',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
+                              data: (deliveries) => Builder(
+                                builder: (context) => Text(
+                                  '${deliveries.length} active',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: context.appTheme.textSecondary,
+                                  ),
                                 ),
                               ),
                               loading: () => const Text('Loading...'),
@@ -362,7 +383,7 @@ class DriverHomePage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
+              backgroundColor: context.appTheme.successColor,
               foregroundColor: Colors.white,
             ),
             child: const Text('Start'),
@@ -376,9 +397,9 @@ class DriverHomePage extends ConsumerWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Shift started successfully'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Shift started successfully'),
+            backgroundColor: context.appTheme.successColor,
           ),
         );
       }
@@ -401,7 +422,7 @@ class DriverHomePage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: context.appTheme.errorColor,
               foregroundColor: Colors.white,
             ),
             child: const Text('End'),
@@ -415,9 +436,9 @@ class DriverHomePage extends ConsumerWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Shift ended successfully'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: const Text('Shift ended successfully'),
+            backgroundColor: context.appTheme.warningColor,
           ),
         );
       }

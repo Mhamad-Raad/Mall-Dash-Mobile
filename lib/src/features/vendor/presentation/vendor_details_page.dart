@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import '../../vendor/data/vendor_model.dart';
 import '../../product/data/product_repository.dart';
 import '../../product/data/product_model.dart';
@@ -18,6 +22,7 @@ class VendorDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appTheme = context.appTheme;
     final productsState = ref.watch(vendorProductsProvider(vendor.id));
     final cart = ref.watch(cartProvider);
 
@@ -63,7 +68,7 @@ class VendorDetailsPage extends ConsumerWidget {
                           return Container(
                             height: 100,
                             width: 100,
-                            color: Colors.grey[300],
+                            color: appTheme.surfaceVariant,
                             child: const Icon(Icons.store, size: 48),
                           );
                         },
@@ -139,13 +144,13 @@ class VendorDetailsPage extends ConsumerWidget {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
-                                        color: Colors.grey[300],
+                                        color: appTheme.surfaceVariant,
                                         child: const Icon(Icons.shopping_bag, size: 48),
                                       );
                                     },
                                   )
                                 : Container(
-                                    color: Colors.grey[300],
+                                    color: appTheme.surfaceVariant,
                                     child: const Icon(Icons.shopping_bag, size: 48),
                                   ),
                           ),
@@ -169,7 +174,7 @@ class VendorDetailsPage extends ConsumerWidget {
                                     '\$${product.price.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: appTheme.textSecondary,
                                       decoration: TextDecoration.lineThrough,
                                     ),
                                   ),
@@ -177,7 +182,7 @@ class VendorDetailsPage extends ConsumerWidget {
                                     '\$${product.effectivePrice.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: Colors.red[700],
+                                      color: appTheme.errorColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -196,7 +201,7 @@ class VendorDetailsPage extends ConsumerWidget {
                                     'Out of Stock',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.red[700],
+                                      color: appTheme.errorColor,
                                     ),
                                   ),
                                 ],
@@ -226,7 +231,7 @@ class VendorDetailsPage extends ConsumerWidget {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
                                                   content: Text(e.toString().replaceAll('Exception: ', '')),
-                                                  backgroundColor: Colors.red,
+                                                  backgroundColor: appTheme.errorColor,
                                                 ),
                                               );
                                             }
@@ -284,16 +289,11 @@ class VendorDetailsPage extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Error loading products: ${error.toString()}'),
-                  ],
-                ),
+              loading: () => const LoadingIndicator(),
+              error: (error, stack) => ErrorState(
+                title: 'Error loading products',
+                message: error.toString(),
+                onRetry: () => ref.invalidate(vendorProductsProvider(vendor.id)),
               ),
             ),
           ),

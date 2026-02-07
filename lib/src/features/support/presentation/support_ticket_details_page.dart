@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import '../data/support_ticket_model.dart';
 import '../data/support_ticket_repository.dart';
 
@@ -13,33 +17,35 @@ class SupportTicketDetailsPage extends ConsumerWidget {
 
   const SupportTicketDetailsPage({super.key, required this.ticketId});
 
-  Color _getStatusColor(int status) {
+  Color _getStatusColor(BuildContext context, int status) {
+    final appTheme = context.appTheme;
     switch (status) {
       case 1:
-        return Colors.orange;
+        return appTheme.warningColor;
       case 2:
-        return Colors.blue;
+        return appTheme.infoColor;
       case 3:
-        return Colors.green;
+        return appTheme.successColor;
       case 4:
-        return Colors.grey;
+        return appTheme.textTertiary;
       default:
-        return Colors.grey;
+        return appTheme.textTertiary;
     }
   }
 
-  Color _getPriorityColor(String priority) {
+  Color _getPriorityColor(BuildContext context, String priority) {
+    final appTheme = context.appTheme;
     switch (priority) {
       case 'Low':
-        return Colors.green;
+        return appTheme.successColor;
       case 'Normal':
-        return Colors.blue;
+        return appTheme.infoColor;
       case 'High':
-        return Colors.orange;
+        return appTheme.warningColor;
       case 'Urgent':
-        return Colors.red;
+        return appTheme.errorColor;
       default:
-        return Colors.grey;
+        return appTheme.textTertiary;
     }
   }
 
@@ -49,6 +55,7 @@ class SupportTicketDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appTheme = context.appTheme;
     final ticketState = ref.watch(ticketDetailsProvider(ticketId));
 
     return Scaffold(
@@ -61,16 +68,16 @@ class SupportTicketDetailsPage extends ConsumerWidget {
             onRefresh: () => ref.refresh(ticketDetailsProvider(ticketId).future),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
+              padding: AppSpacing.allMd,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: AppSpacing.statusBadge,
                     decoration: BoxDecoration(
-                      color: _getStatusColor(ticket.status).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
+                      color: _getStatusColor(context, ticket.status).withOpacity(0.2),
+                      borderRadius: AppRadius.radiusPill,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -78,13 +85,13 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                         Icon(
                           Icons.circle,
                           size: 12,
-                          color: _getStatusColor(ticket.status),
+                          color: _getStatusColor(context, ticket.status),
                         ),
-                        const SizedBox(width: 8),
+                        AppSpacing.horizontalGapXs,
                         Text(
                           ticket.statusName,
                           style: TextStyle(
-                            color: _getStatusColor(ticket.status),
+                            color: _getStatusColor(context, ticket.status),
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -92,18 +99,18 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.verticalGapMd,
 
                   // Subject
-                  const Text(
+                  Text(
                     'Subject',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey,
+                      color: appTheme.textTertiary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  AppSpacing.verticalGapXxs,
                   Text(
                     ticket.subject,
                     style: const TextStyle(
@@ -111,31 +118,31 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  AppSpacing.verticalGapMd,
 
                   // Priority
                   Row(
                     children: [
-                      const Icon(Icons.priority_high, size: 20, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      const Text(
+                      Icon(Icons.priority_high, size: 20, color: appTheme.textTertiary),
+                      AppSpacing.horizontalGapXs,
+                      Text(
                         'Priority:',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: appTheme.textTertiary,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.horizontalGapXs,
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getPriorityColor(ticket.priority).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: _getPriorityColor(context, ticket.priority).withOpacity(0.2),
+                          borderRadius: AppRadius.radiusMd,
                         ),
                         child: Text(
                           ticket.priority,
                           style: TextStyle(
-                            color: _getPriorityColor(ticket.priority),
+                            color: _getPriorityColor(context, ticket.priority),
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
@@ -153,13 +160,13 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  AppSpacing.verticalGapXs,
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: AppSpacing.allMd,
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
+                      color: appTheme.surfaceVariant,
+                      borderRadius: AppRadius.radiusMd,
                     ),
                     child: Text(
                       ticket.description,
@@ -169,7 +176,7 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  AppSpacing.verticalGapLg,
 
                   // Admin Notes (if any)
                   if (ticket.adminNotes != null && ticket.adminNotes!.isNotEmpty) ...[
@@ -180,66 +187,66 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    AppSpacing.verticalGapXs,
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: AppSpacing.allMd,
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue[200]!),
+                        color: appTheme.infoContainerColor,
+                        borderRadius: AppRadius.radiusMd,
+                        border: Border.all(color: appTheme.infoColor.withOpacity(0.3)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.support_agent, size: 20, color: Colors.blue[700]),
-                              const SizedBox(width: 8),
+                              Icon(Icons.support_agent, size: 20, color: appTheme.infoColor),
+                              AppSpacing.horizontalGapXs,
                               Text(
                                 'Support Team',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue[900],
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          AppSpacing.verticalGapXs,
                           Text(
                             ticket.adminNotes!,
                             style: TextStyle(
                               fontSize: 15,
                               height: 1.5,
-                              color: Colors.blue[900],
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalGapLg,
                   ],
 
                   // Timestamps
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: AppSpacing.allMd,
                       child: Column(
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.access_time, size: 20, color: Colors.grey),
+                              Icon(Icons.access_time, size: 20, color: appTheme.textTertiary),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Created',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.grey,
+                                        color: appTheme.textTertiary,
                                       ),
                                     ),
                                     Text(
@@ -258,17 +265,17 @@ class SupportTicketDetailsPage extends ConsumerWidget {
                             const Divider(height: 24),
                             Row(
                               children: [
-                                const Icon(Icons.update, size: 20, color: Colors.grey),
+                                Icon(Icons.update, size: 20, color: appTheme.textTertiary),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'Last Updated',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey,
+                                          color: appTheme.textTertiary,
                                         ),
                                       ),
                                       Text(
@@ -293,33 +300,11 @@ class SupportTicketDetailsPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 60, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading ticket',
-                style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString().replaceAll('Exception: ', ''),
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ref.invalidate(ticketDetailsProvider(ticketId));
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingIndicator(),
+        error: (error, stack) => ErrorState(
+          title: 'Error loading ticket',
+          message: error.toString().replaceAll('Exception: ', ''),
+          onRetry: () => ref.invalidate(ticketDetailsProvider(ticketId)),
         ),
       ),
     );

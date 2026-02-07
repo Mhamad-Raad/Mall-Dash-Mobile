@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/status_badge.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import 'driver_orders_notifier.dart';
 import 'delivery_details_page.dart';
 import '../data/driver_order_model.dart';
@@ -16,27 +22,10 @@ class ActiveDeliveriesPage extends ConsumerWidget {
       body: deliveriesState.when(
         data: (deliveries) {
           if (deliveries.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.local_shipping_outlined,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No active deliveries',
-                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Accept an order to start delivering',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.local_shipping_outlined,
+              title: 'No active deliveries',
+              subtitle: 'Accept an order to start delivering',
             );
           }
 
@@ -47,7 +36,7 @@ class ActiveDeliveriesPage extends ConsumerWidget {
                   .refresh();
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.allMd,
               itemCount: deliveries.length,
               itemBuilder: (context, index) {
                 final delivery = deliveries[index];
@@ -56,33 +45,13 @@ class ActiveDeliveriesPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading deliveries',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(activeDeliveriesNotifierProvider.notifier).refresh();
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingIndicator(),
+        error: (error, stackTrace) => ErrorState(
+          title: 'Error loading deliveries',
+          message: error.toString(),
+          onRetry: () {
+            ref.read(activeDeliveriesNotifierProvider.notifier).refresh();
+          },
         ),
       ),
     );
@@ -96,6 +65,7 @@ class _DeliveryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appTheme = context.appTheme;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -109,7 +79,7 @@ class _DeliveryCard extends ConsumerWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.allMd,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,34 +93,21 @@ class _DeliveryCard extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(delivery.status),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      delivery.statusName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  StatusBadgeSolid(
+                    label: delivery.statusName,
+                    statusCode: delivery.status,
+                    size: StatusBadgeSize.small,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              AppSpacing.verticalGapSm,
               Row(
                 children: [
-                  const Icon(Icons.person_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.person_outline, size: AppSpacing.iconSm + 2, color: appTheme.textTertiary),
+                  AppSpacing.horizontalGapXs,
                   Text(
                     delivery.customerName ?? 'Customer',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, color: appTheme.textSecondary),
                   ),
                 ],
               ),
@@ -189,10 +146,10 @@ class _DeliveryCard extends ConsumerWidget {
                     const Text('Total Amount', style: TextStyle(fontSize: 14)),
                     Text(
                       '\$${delivery.totalAmount!.toStringAsFixed(2)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: appTheme.successColor,
                       ),
                     ),
                   ],
@@ -215,7 +172,7 @@ class _DeliveryCard extends ConsumerWidget {
                     icon: const Icon(Icons.local_shipping),
                     label: const Text('Mark In Transit'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: appTheme.infoColor,
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -230,7 +187,7 @@ class _DeliveryCard extends ConsumerWidget {
                     icon: const Icon(Icons.check_circle),
                     label: const Text('Mark Delivered'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: appTheme.successColor,
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -243,16 +200,7 @@ class _DeliveryCard extends ConsumerWidget {
     );
   }
 
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 6:
-        return Colors.orange; // Picked up
-      case 7:
-        return Colors.blue; // In transit
-      default:
-        return Colors.grey;
-    }
-  }
+  // Status color now handled by StatusBadgeSolid widget
 
   String _formatAddress(DriverOrder delivery) {
     final parts = <String>[];
@@ -301,19 +249,21 @@ class _DeliveryCard extends ConsumerWidget {
             .updateOrderStatus(orderId, newStatus);
 
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Status updated to ${newStatus.displayName}'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error updating status: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }
@@ -340,10 +290,6 @@ class _DeliveryCard extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
             child: const Text('Complete'),
           ),
         ],
@@ -357,19 +303,21 @@ class _DeliveryCard extends ConsumerWidget {
             .completeDelivery(orderId);
 
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Delivery completed successfully!'),
-              backgroundColor: Colors.green,
+              backgroundColor: appTheme.successColor,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final appTheme = context.appTheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error completing delivery: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: appTheme.errorColor,
             ),
           );
         }

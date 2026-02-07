@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/design/design_system.dart';
+import '../../../core/theme/custom_theme_extension.dart';
+import '../../../core/widgets/status_badge.dart';
+import '../../../core/widgets/info_row.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
 import '../../order/presentation/orders_notifier.dart';
 import '../../order/presentation/order_details_page.dart';
 import '../../order/data/order_model.dart';
@@ -7,28 +14,10 @@ import '../../order/data/order_model.dart';
 class OrdersPage extends ConsumerWidget {
   const OrdersPage({super.key});
 
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 1: // Pending
-        return Colors.orange;
-      case 2: // Confirmed
-        return Colors.blue;
-      case 3: // Preparing
-        return Colors.purple;
-      case 4: // OutForDelivery
-        return Colors.indigo;
-      case 5: // Delivered
-        return Colors.green;
-      case 6: // Cancelled
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersState = ref.watch(ordersProvider);
+    final appTheme = context.appTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -43,30 +32,22 @@ class OrdersPage extends ConsumerWidget {
       body: ordersState.when(
         data: (orders) {
           if (orders.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text(
-                    'No orders yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                ],
-              ),
+            return const EmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'No orders yet',
+              subtitle: 'Your orders will appear here',
             );
           }
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(ordersProvider),
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.allMd,
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: InkWell(
                     onTap: () {
                       Navigator.push(
@@ -76,8 +57,9 @@ class OrdersPage extends ConsumerWidget {
                         ),
                       );
                     },
+                    borderRadius: AppRadius.radiusMd,
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: AppSpacing.allMd,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -87,85 +69,50 @@ class OrdersPage extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   'Order #${order.orderNumber}',
-                                  style: const TextStyle(
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor(order.status).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  order.statusName,
-                                  style: TextStyle(
-                                    color: _getStatusColor(order.status),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
+                              AppSpacing.horizontalGapXs,
+                              StatusBadge(
+                                label: order.statusName,
+                                statusCode: order.status,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          AppSpacing.verticalGapXs,
                           if (order.vendorName != null)
-                            Row(
-                              children: [
-                                const Icon(Icons.store, size: 16, color: Colors.grey),
-                                const SizedBox(width: 8),
-                                Text(
-                                  order.vendorName!,
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              ],
+                            InfoRow(
+                              icon: Icons.store,
+                              text: order.vendorName!,
                             ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                              const SizedBox(width: 8),
-                              Text(
-                                _formatDateTime(order.createdAt),
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
+                          AppSpacing.verticalGapXxs,
+                          InfoRow(
+                            icon: Icons.access_time,
+                            text: _formatDateTime(order.createdAt),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.shopping_bag, size: 16, color: Colors.grey),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${order.itemCount} item${order.itemCount != 1 ? 's' : ''}',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
+                          AppSpacing.verticalGapXs,
+                          InfoRow(
+                            icon: Icons.shopping_bag,
+                            text: '${order.itemCount} item${order.itemCount != 1 ? 's' : ''}',
                           ),
-                          const Divider(height: 24),
+                          Divider(height: AppSpacing.lg, color: appTheme.dividerColor),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Total Amount:',
-                                style: TextStyle(
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
                                 ),
                               ),
                               Text(
                                 '\$${order.totalAmount.toStringAsFixed(2)}',
-                                style: const TextStyle(
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.green,
+                                  color: appTheme.successColor,
                                 ),
                               ),
                             ],
@@ -179,30 +126,11 @@ class OrdersPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading orders',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString().replaceAll('Exception: ', ''),
-                style: const TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(ordersProvider),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingIndicator(),
+        error: (error, stack) => ErrorState(
+          title: 'Error loading orders',
+          message: error.toString().replaceAll('Exception: ', ''),
+          onRetry: () => ref.invalidate(ordersProvider),
         ),
       ),
     );
