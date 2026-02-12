@@ -50,9 +50,22 @@ class AuthRepository {
           error: 'Keys: ${data.keys.join(", ")}',
         );
 
-        // Handle different possible response formats
-        final accessToken = data['accessToken'] ?? data['access_token'];
-        final refreshToken = data['refreshToken'] ?? data['refresh_token'];
+        // Handle different possible response formats:
+        // Format 1: {accessToken, refreshToken, ...}
+        // Format 2: {access_token, refresh_token, ...}
+        // Format 3: {token: {accessToken, refreshToken}}
+        // Format 4: {data: {accessToken, refreshToken}}
+        var accessToken = data['accessToken'] ?? data['access_token'];
+        var refreshToken = data['refreshToken'] ?? data['refresh_token'];
+
+        // Check nested formats if not found at top level
+        if (accessToken == null || refreshToken == null) {
+          final nested = data['token'] ?? data['data'];
+          if (nested is Map<String, dynamic>) {
+            accessToken ??= nested['accessToken'] ?? nested['access_token'];
+            refreshToken ??= nested['refreshToken'] ?? nested['refresh_token'];
+          }
+        }
 
         if (accessToken != null && refreshToken != null) {
           developer.log('Saving authentication tokens', name: 'AuthRepository');
@@ -62,10 +75,11 @@ class AuthRepository {
           );
         } else {
           developer.log(
-            'Warning: Login response missing tokens',
+            'CRITICAL: Login response missing tokens!',
             name: 'AuthRepository',
-            error: 'Response: $data',
+            error: 'Response keys: ${data.keys.join(", ")}, Full data: $data',
           );
+          throw Exception('Login succeeded but server did not return authentication tokens');
         }
 
         return data;
@@ -96,8 +110,26 @@ class AuthRepository {
     try {
       developer.log('Validating token with backend', name: 'AuthRepository');
       
-      final response = await _dio.post(
+      final refreshToken = await _tokenStorage.getRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        developer.log('No refresh token available for validation', name: 'AuthRepository');
+        return false;
+      }
+
+      // Use a separate Dio instance to avoid the auth interceptor adding
+      // potentially stale access tokens and triggering refresh loops.
+      final validationDio = Dio(
+        BaseOptions(
+          baseUrl: _dio.options.baseUrl,
+          contentType: 'application/json',
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
+
+      final response = await validationDio.post(
         '/Account/validate-token',
+        data: {'refreshToken': refreshToken},
         options: Options(
           validateStatus: (status) {
             if (status == null) return false;
@@ -118,27 +150,64 @@ class AuthRepository {
         return true;
       }
 
-      if (status == 401 || status == 403) {
-        return false;
-      }
-
-      return true;
+      // Any non-200 means the token is not valid
+      return false;
     } on DioException catch (e) {
       developer.log(
         'Token validation failed',
         name: 'AuthRepository',
         error: 'Status: ${e.response?.statusCode}, Message: ${e.message}',
       );
-      final status = e.response?.statusCode;
-
-      if (status == 401 || status == 403) {
-        return false;
-      }
-
-      return true;
+      return false;
     } catch (e) {
       developer.log('Token validation error', name: 'AuthRepository', error: e.toString());
-      return true;
+      return false;
+    }
+  }
+
+  /// Attempt to refresh the access token using the stored refresh token.
+  /// Returns true if refresh succeeded and new tokens were saved.
+  Future<bool> tryRefreshTokens() async {
+    try {
+      final refreshToken = await _tokenStorage.getRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) return false;
+
+      developer.log('Attempting to refresh tokens...', name: 'AuthRepository');
+
+      final refreshDio = Dio(
+        BaseOptions(
+          baseUrl: _dio.options.baseUrl,
+          contentType: 'application/json',
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
+
+      final response = await refreshDio.post(
+        '/Account/Mobile/refresh',
+        data: {'refreshToken': refreshToken},
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final newAccessToken = data['accessToken'] ?? data['access_token'];
+        final newRefreshToken = data['refreshToken'] ?? data['refresh_token'];
+
+        if (newAccessToken != null && newRefreshToken != null) {
+          await _tokenStorage.saveTokens(
+            accessToken: newAccessToken.toString(),
+            refreshToken: newRefreshToken.toString(),
+          );
+          developer.log('Token refresh successful', name: 'AuthRepository');
+          return true;
+        }
+      }
+
+      developer.log('Token refresh returned unexpected response', name: 'AuthRepository');
+      return false;
+    } catch (e) {
+      developer.log('Token refresh failed', name: 'AuthRepository', error: e.toString());
+      return false;
     }
   }
 

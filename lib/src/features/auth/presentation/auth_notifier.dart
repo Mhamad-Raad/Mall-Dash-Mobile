@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import '../../../core/storage/token_storage_service.dart';
 import '../../../core/network/dio_provider.dart';
 import '../data/auth_repository.dart';
+import 'login_controller.dart';
 import '../../profile/presentation/user_profile_notifier.dart';
 import '../../order/presentation/orders_notifier.dart';
 import '../../order/presentation/cart_notifier.dart';
@@ -43,14 +44,31 @@ class AuthNotifier extends Notifier<AuthStatus> {
     );
 
     if (refreshToken != null && refreshToken.isNotEmpty) {
-      // Validate token with backend
+      // Validate refresh token with backend
       try {
         final repository = ref.read(authRepositoryProvider);
         final isValid = await repository.validateToken();
         
         if (isValid) {
-          developer.log('Token validated successfully', name: 'AuthNotifier');
-          state = AuthStatus.authenticated;
+          // Refresh token is valid - if access token exists, assume authenticated.
+          // The Dio interceptor will handle refreshing the access token if needed.
+          if (accessToken != null && accessToken.isNotEmpty) {
+            developer.log('Token validated successfully', name: 'AuthNotifier');
+            state = AuthStatus.authenticated;
+          } else {
+            // Refresh token valid but no access token - try refreshing now
+            developer.log('Refresh token valid but no access token - attempting refresh', name: 'AuthNotifier');
+            final refreshed = await repository.tryRefreshTokens();
+            if (refreshed) {
+              developer.log('Token refresh successful', name: 'AuthNotifier');
+              state = AuthStatus.authenticated;
+            } else {
+              developer.log('Token refresh failed - clearing all user data', name: 'AuthNotifier');
+              await tokenService.clearTokens();
+              ref.invalidate(userProfileProvider);
+              state = AuthStatus.unauthenticated;
+            }
+          }
         } else {
           developer.log('Token validation failed - clearing all user data', name: 'AuthNotifier');
           await tokenService.clearTokens();
@@ -81,6 +99,9 @@ class AuthNotifier extends Notifier<AuthStatus> {
     } finally {
       // CRITICAL: Invalidate ALL user-specific providers to prevent data leakage between users
       developer.log('Invalidating all user-specific providers', name: 'AuthNotifier');
+      
+      // Auth/login state
+      ref.invalidate(loginControllerProvider);
       
       // Profile data
       ref.invalidate(userProfileProvider);

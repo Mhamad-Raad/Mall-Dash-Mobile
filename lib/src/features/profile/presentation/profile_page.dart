@@ -286,6 +286,7 @@ class ProfilePage extends ConsumerWidget {
     );
 
     if (shouldLogout == true && context.mounted) {
+      // Show loading dialog and capture its Navigator context
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -293,11 +294,24 @@ class ProfilePage extends ConsumerWidget {
       );
 
       try {
+        // Logout will set auth state to unauthenticated, which triggers
+        // AuthWidget to swap MainScaffold with LoginPage. We just need
+        // to dismiss the loading dialog before that happens.
+        
+        // Pop the loading dialog first, before the auth state changes
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        
+        // Now trigger the logout — this invalidates providers and
+        // changes auth state, which will automatically navigate to LoginPage
+        // via AuthWidget's AnimatedSwitcher.
         await ref.read(authNotifierProvider.notifier).logout();
-        if (context.mounted) Navigator.of(context).pop();
-        if (context.mounted) Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
-        if (context.mounted) Navigator.of(context).pop();
+        if (context.mounted) {
+          // If dialog is still showing, pop it
+          Navigator.of(context, rootNavigator: true).pop();
+        }
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Logout error: $e'), backgroundColor: AppColors.error),

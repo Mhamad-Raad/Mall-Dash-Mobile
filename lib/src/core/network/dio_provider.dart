@@ -29,12 +29,26 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final accessToken = await tokenStorage.getAccessToken();
-        if (accessToken != null && accessToken.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $accessToken';
-          developer.log('Added auth token to request: ${options.path}', name: 'DioInterceptor');
+        // Don't add auth header to public/auth endpoints to avoid
+        // stale tokens interfering with login, register, or refresh requests.
+        final path = options.path.toLowerCase();
+        final isAuthEndpoint = path.contains('/account/login') ||
+            path.contains('/account/register') ||
+            path.contains('/account/mobile/refresh') ||
+            path.contains('/account/validate-token') ||
+            path.contains('/account/forgot-password') ||
+            path.contains('/account/reset-password');
+
+        if (!isAuthEndpoint) {
+          final accessToken = await tokenStorage.getAccessToken();
+          if (accessToken != null && accessToken.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+            developer.log('Added auth token to request: ${options.path}', name: 'DioInterceptor');
+          } else {
+            developer.log('No access token available for request: ${options.path}', name: 'DioInterceptor');
+          }
         } else {
-          developer.log('No access token available for request: ${options.path}', name: 'DioInterceptor');
+          developer.log('Skipping auth header for auth endpoint: ${options.path}', name: 'DioInterceptor');
         }
         return handler.next(options);
       },
@@ -45,8 +59,15 @@ final dioProvider = Provider<Dio>((ref) {
           error: 'Status: ${error.response?.statusCode}, Message: ${error.message}',
         );
 
+        // Don't try to refresh tokens for auth endpoints themselves
+        final errorPath = error.requestOptions.path.toLowerCase();
+        final isAuthEndpoint = errorPath.contains('/account/login') ||
+            errorPath.contains('/account/register') ||
+            errorPath.contains('/account/mobile/refresh') ||
+            errorPath.contains('/account/validate-token');
+
         // Handle 401 Unauthorized - token expired or invalid
-        if (error.response?.statusCode == 401) {
+        if (error.response?.statusCode == 401 && !isAuthEndpoint) {
           developer.log('Received 401 Unauthorized - attempting token refresh', name: 'DioInterceptor');
           
           final refreshToken = await tokenStorage.getRefreshToken();
@@ -128,12 +149,18 @@ final dioProvider = Provider<Dio>((ref) {
               
               // Notify auth system to logout
               authErrorController.add(null);
+              
+              // Reject with the original error — don't continue the chain
+              return handler.reject(error);
             }
           } else {
             // No refresh token available - clear tokens and trigger logout
             developer.log('No refresh token available - clearing tokens', name: 'DioInterceptor');
             await tokenStorage.clearTokens();
             authErrorController.add(null);
+            
+            // Reject with the original error
+            return handler.reject(error);
           }
         }
         

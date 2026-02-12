@@ -14,6 +14,7 @@ import '../../features/profile/presentation/user_profile_notifier.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../../features/driver/presentation/driver_home_page.dart';
+import '../../features/auth/presentation/auth_notifier.dart';
 import '../constants/user_role.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -44,12 +45,24 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         }
       },
       loading: () => const Scaffold(body: LoadingIndicator()),
-      error: (error, _) => Scaffold(
-        body: ErrorState(
-          message: error.toString(),
-          onRetry: () => ref.read(userProfileProvider.notifier).refresh(),
-        ),
-      ),
+      error: (error, _) {
+        // If the error is authentication-related, redirect to login
+        final errorMsg = error.toString().toLowerCase();
+        if (errorMsg.contains('authentication required') || errorMsg.contains('401')) {
+          developer.log('Auth error in MainScaffold - triggering logout', name: 'MainScaffold');
+          // Schedule the state change for next frame to avoid setState during build
+          Future.microtask(() {
+            ref.read(authNotifierProvider.notifier).logout();
+          });
+          return const Scaffold(body: LoadingIndicator(message: 'Redirecting to login...'));
+        }
+        return Scaffold(
+          body: ErrorState(
+            message: error.toString(),
+            onRetry: () => ref.read(userProfileProvider.notifier).refresh(),
+          ),
+        );
+      },
     );
   }
 
