@@ -44,6 +44,11 @@ dependencies:
   dio: ^5.9.0
   font_awesome_flutter: ^10.12.0
   signalr_core: ^1.0.0
+  google_fonts: ^6.2.1
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.2
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.17
 
 dev_dependencies:
   flutter_test:

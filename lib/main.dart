@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
@@ -12,9 +14,24 @@ import 'src/core/design/design_system.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set system UI overlay style for premium feel
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
+  
+  // Enable edge-to-edge
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(ProviderScope(overrides: [sharedPreferencesProvider.overrideWithValue(prefs)], child: const MyApp()));
+  runApp(ProviderScope(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends ConsumerWidget {
@@ -43,12 +60,12 @@ class MyApp extends ConsumerWidget {
     );
   }
 
-  /// Build the light theme with comprehensive component styling.
   ThemeData _buildLightTheme() {
+    final textTheme = GoogleFonts.interTextTheme(ThemeData.light().textTheme);
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: AppColors.primaryMedium,
       brightness: Brightness.light,
-      primary: AppColors.primary,
+      primary: AppColors.primaryMedium,
       onPrimary: AppColors.onPrimary,
       primaryContainer: AppColors.primaryContainer,
       secondary: AppColors.secondary,
@@ -63,168 +80,163 @@ class MyApp extends ConsumerWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      textTheme: textTheme,
       scaffoldBackgroundColor: AppColors.background,
       
-      // AppBar theme
       appBarTheme: AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: AppShadows.elevationXs,
-        backgroundColor: colorScheme.surface,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.inter(
           fontSize: AppTypography.sizeTitle,
-          fontWeight: AppTypography.semiBold,
+          fontWeight: AppTypography.bold,
           color: colorScheme.onSurface,
+          letterSpacing: -0.5,
         ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
       
-      // Card theme
       cardTheme: CardThemeData(
-        elevation: AppShadows.elevationSm,
+        elevation: 0,
         shape: AppRadius.cardShape,
         color: AppColors.cardBackground,
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
       ),
       
-      // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: AppShadows.elevationXs,
-          padding: AppSpacing.buttonPadding,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           shape: AppRadius.buttonShape,
           foregroundColor: colorScheme.primary,
           backgroundColor: colorScheme.surface,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Filled button theme
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           shape: AppRadius.buttonShape,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Outlined button theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: AppSpacing.buttonPadding,
           shape: AppRadius.buttonShape,
-          side: BorderSide(color: colorScheme.outline),
+          side: BorderSide(color: colorScheme.outline.withAlpha(100)),
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Text button theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: AppSpacing.buttonPadding,
           shape: AppRadius.buttonShape,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
+        filled: true,
+        fillColor: AppColors.surfaceVariant.withAlpha(120),
         border: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppRadius.radiusMd,
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppRadius.radiusMd,
+          borderSide: BorderSide(color: colorScheme.outline.withAlpha(60)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
+          borderRadius: AppRadius.radiusMd,
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
+          borderRadius: AppRadius.radiusMd,
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding: AppSpacing.formField,
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        hintStyle: GoogleFonts.inter(color: AppColors.textTertiary),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
       ),
       
-      // List tile theme
       listTileTheme: ListTileThemeData(
         contentPadding: AppSpacing.horizontalMd,
         shape: AppRadius.cardShape,
       ),
       
-      // Divider theme
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
       ),
       
-      // Bottom navigation bar theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        elevation: AppShadows.elevationMd,
-        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         selectedItemColor: colorScheme.primary,
         unselectedItemColor: AppColors.iconSecondary,
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
+        selectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
       ),
       
-      // Floating action button theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: AppShadows.elevationMd,
+        elevation: 0,
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         shape: const CircleBorder(),
       ),
       
-      // Snackbar theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: AppRadius.cardShape,
-        backgroundColor: AppColors.textPrimary,
-        contentTextStyle: const TextStyle(color: Colors.white),
+        backgroundColor: AppColors.primary,
+        contentTextStyle: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
       ),
       
-      // Dialog theme
       dialogTheme: DialogThemeData(
-        elevation: AppShadows.elevationLg,
+        elevation: 0,
         shape: AppRadius.dialogShape,
         backgroundColor: colorScheme.surface,
       ),
       
-      // Bottom sheet theme
       bottomSheetTheme: BottomSheetThemeData(
-        elevation: AppShadows.elevationLg,
+        elevation: 0,
         shape: AppRadius.bottomSheetShape,
         backgroundColor: colorScheme.surface,
-        modalElevation: AppShadows.elevationLg,
       ),
       
-      // Chip theme
       chipTheme: ChipThemeData(
         shape: AppRadius.chipShape,
         backgroundColor: colorScheme.surfaceContainerHighest,
         selectedColor: colorScheme.primaryContainer,
         padding: AppSpacing.horizontalXs,
+        labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
       ),
       
-      // Progress indicator theme
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: colorScheme.primary,
+        color: AppColors.accent,
         linearTrackColor: colorScheme.primaryContainer,
       ),
       
-      // Extensions
       extensions: const [CustomThemeExtension.light],
     );
   }
 
-  /// Build the dark theme with comprehensive component styling.
   ThemeData _buildDarkTheme() {
+    final textTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: AppColors.primaryMedium,
       brightness: Brightness.dark,
-      primary: AppColors.primaryLight,
+      primary: AppColors.accentLight,
       onPrimary: AppColors.primaryDark,
       primaryContainer: AppColors.primaryContainerDark,
       secondary: AppColors.secondaryDark,
@@ -239,158 +251,153 @@ class MyApp extends ConsumerWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      textTheme: textTheme,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       
-      // AppBar theme
       appBarTheme: AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: AppShadows.elevationXs,
-        backgroundColor: colorScheme.surface,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.inter(
           fontSize: AppTypography.sizeTitle,
-          fontWeight: AppTypography.semiBold,
+          fontWeight: AppTypography.bold,
           color: colorScheme.onSurface,
+          letterSpacing: -0.5,
         ),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       
-      // Card theme
       cardTheme: CardThemeData(
-        elevation: AppShadows.elevationSm,
+        elevation: 0,
         shape: AppRadius.cardShape,
         color: AppColors.cardBackgroundDark,
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
       ),
       
-      // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: AppShadows.elevationXs,
-          padding: AppSpacing.buttonPadding,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           shape: AppRadius.buttonShape,
           foregroundColor: colorScheme.primary,
           backgroundColor: colorScheme.surface,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Filled button theme
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           shape: AppRadius.buttonShape,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Outlined button theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: AppSpacing.buttonPadding,
           shape: AppRadius.buttonShape,
           side: BorderSide(color: colorScheme.outline),
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Text button theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: AppSpacing.buttonPadding,
           shape: AppRadius.buttonShape,
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       
-      // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
+        filled: true,
+        fillColor: AppColors.surfaceVariantDark.withAlpha(120),
         border: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppRadius.radiusMd,
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppRadius.radiusMd,
+          borderSide: BorderSide(color: colorScheme.outline.withAlpha(60)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
+          borderRadius: AppRadius.radiusMd,
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: AppRadius.radiusSm,
+          borderRadius: AppRadius.radiusMd,
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding: AppSpacing.formField,
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        hintStyle: GoogleFonts.inter(color: AppColors.textTertiaryDark),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondaryDark),
       ),
       
-      // List tile theme
       listTileTheme: ListTileThemeData(
         contentPadding: AppSpacing.horizontalMd,
         shape: AppRadius.cardShape,
       ),
       
-      // Divider theme
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: AppColors.dividerDark,
         thickness: 1,
         space: 1,
       ),
       
-      // Bottom navigation bar theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        elevation: AppShadows.elevationMd,
-        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         selectedItemColor: colorScheme.primary,
         unselectedItemColor: AppColors.iconSecondaryDark,
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
+        selectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
       ),
       
-      // Floating action button theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: AppShadows.elevationMd,
+        elevation: 0,
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         shape: const CircleBorder(),
       ),
       
-      // Snackbar theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: AppRadius.cardShape,
         backgroundColor: AppColors.textPrimaryDark,
-        contentTextStyle: const TextStyle(color: Colors.black),
+        contentTextStyle: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.w500),
       ),
       
-      // Dialog theme
       dialogTheme: DialogThemeData(
-        elevation: AppShadows.elevationLg,
+        elevation: 0,
         shape: AppRadius.dialogShape,
         backgroundColor: colorScheme.surface,
       ),
       
-      // Bottom sheet theme
       bottomSheetTheme: BottomSheetThemeData(
-        elevation: AppShadows.elevationLg,
+        elevation: 0,
         shape: AppRadius.bottomSheetShape,
         backgroundColor: colorScheme.surface,
-        modalElevation: AppShadows.elevationLg,
       ),
       
-      // Chip theme
       chipTheme: ChipThemeData(
         shape: AppRadius.chipShape,
         backgroundColor: colorScheme.surfaceContainerHighest,
         selectedColor: colorScheme.primaryContainer,
         padding: AppSpacing.horizontalXs,
+        labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
       ),
       
-      // Progress indicator theme
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: colorScheme.primary,
+        color: AppColors.accent,
         linearTrackColor: colorScheme.primaryContainer,
       ),
       
-      // Extensions
       extensions: const [CustomThemeExtension.dark],
     );
   }

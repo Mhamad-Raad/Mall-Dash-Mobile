@@ -16,3 +16,6 @@ export 'loading_indicator.dart';
 export 'section_header.dart';
 export 'theme_toggle_button.dart';
 export 'language_selector.dart';
+export 'gradient_button.dart';
+export 'glass_container.dart';
+export 'shimmer_widgets.dart';

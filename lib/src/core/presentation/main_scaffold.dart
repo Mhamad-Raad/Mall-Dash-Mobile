@@ -1,5 +1,7 @@
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:developer' as developer;
 import '../design/design_system.dart';
 import '../theme/custom_theme_extension.dart';
@@ -22,7 +24,7 @@ class MainScaffold extends ConsumerStatefulWidget {
 }
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
-  int _currentIndex = 1; // Default to Home (Middle)
+  int _currentIndex = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -30,24 +32,15 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     return profileAsync.when(
       data: (profile) {
-        // Check user role using UserRole constants
         final isDriver = UserRole.isDriver(profile.role);
-        
-        // Enhanced logging for debugging role-based navigation
         developer.log(
-          'MainScaffold: User role detected',
+          'MainScaffold: Role: ${profile.role}, IsDriver: $isDriver',
           name: 'MainScaffold',
-          error: 'Role: ${profile.role}, IsDriver: $isDriver, Email: ${profile.email}',
         );
-
         if (isDriver) {
-          // Driver interface - single page navigation
-          developer.log('Showing Driver interface', name: 'MainScaffold');
           return const DriverHomePage();
         } else {
-          // Tenant interface - bottom navigation
-          developer.log('Showing Tenant interface', name: 'MainScaffold');
-          return _buildTenantScaffold();
+          return _buildTenantScaffold(profile.firstName);
         }
       },
       loading: () => const Scaffold(body: LoadingIndicator()),
@@ -60,61 +53,156 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     );
   }
 
-  Widget _buildTenantScaffold() {
+  Widget _buildTenantScaffold(String firstName) {
     final List<Widget> pages = const [OrdersPage(), HomePage(), ProfilePage()];
+    final isDark = context.isDarkMode;
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
-        title: const Text('Mall Dash'),
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Mall Dash',
+              style: GoogleFonts.inter(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationsPage(),
-                ),
-              );
-            },
+          _buildIconAction(
+            icon: Icons.notifications_outlined,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsPage()),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
+          _buildIconAction(
+            icon: Icons.settings_outlined,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: _buildPremiumBottomNav(isDark),
+    );
+  }
+
+  Widget _buildIconAction({required IconData icon, required VoidCallback onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(icon, size: 22),
+        style: IconButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(120),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
+          fixedSize: const Size(40, 40),
+        ),
       ),
     );
   }
+
+  Widget _buildPremiumBottomNav(bool isDark) {
+    final items = [
+      _NavItem(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'Orders'),
+      _NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
+      _NavItem(Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.cardBackgroundDark.withAlpha(230)
+            : Colors.white.withAlpha(240),
+        borderRadius: AppRadius.radiusXl,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 40 : 15),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(
+          color: isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.radiusXl,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: items.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final isSelected = _currentIndex == index;
+
+                return GestureDetector(
+                  onTap: () => setState(() => _currentIndex = index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSelected ? 20 : 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary.withAlpha(isDark ? 40 : 20)
+                          : Colors.transparent,
+                      borderRadius: AppRadius.radiusMd,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isSelected ? item.activeIcon : item.icon,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiary),
+                          size: 22,
+                        ),
+                        if (isSelected) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            item.label,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  const _NavItem(this.icon, this.activeIcon, this.label);
 }

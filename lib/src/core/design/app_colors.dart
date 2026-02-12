@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 
-/// Centralized color palette for Mall Dash app.
-/// All colors should be accessed through this class to ensure consistency.
+/// Premium luxury color palette for Mall Dash app.
+/// Rich, warm tones with gold accents for a high-end feel.
 abstract final class AppColors {
   // ==========================================================================
-  // PRIMARY COLORS - Blue Professional Theme
+  // PRIMARY COLORS - Deep Royal Indigo
   // ==========================================================================
   
-  /// Primary brand color - Professional Blue
-  static const Color primary = Color(0xFF1565C0);
-  static const Color primaryLight = Color(0xFF1976D2);
-  static const Color primaryDark = Color(0xFF0D47A1);
+  static const Color primary = Color(0xFF1A1A2E);
+  static const Color primaryLight = Color(0xFF16213E);
+  static const Color primaryMedium = Color(0xFF0F3460);
+  static const Color primaryDark = Color(0xFF0A0A1A);
   
-  /// Primary container colors
-  static const Color primaryContainer = Color(0xFFD1E4FF);
-  static const Color primaryContainerDark = Color(0xFF004881);
+  static const Color primaryContainer = Color(0xFFE8EAF6);
+  static const Color primaryContainerDark = Color(0xFF1A237E);
   
-  /// On primary colors (text/icons on primary background)
   static const Color onPrimary = Colors.white;
-  static const Color onPrimaryDark = Color(0xFFD1E4FF);
+  static const Color onPrimaryDark = Color(0xFFE8EAF6);
+  
+  // ==========================================================================
+  // ACCENT COLORS - Premium Gold
+  // ==========================================================================
+  
+  static const Color accent = Color(0xFFE2B93B);
+  static const Color accentLight = Color(0xFFF0C75E);
+  static const Color accentDark = Color(0xFFC9A227);
+  static const Color accentSoft = Color(0xFFFFF8E1);
   
   // ==========================================================================
   // SECONDARY COLORS
@@ -26,149 +33,161 @@ abstract final class AppColors {
   
   static const Color secondary = Color(0xFF545F71);
   static const Color secondaryDark = Color(0xFFBCC7DB);
-  static const Color secondaryContainer = Color(0xFFD8E3F8);
+  static const Color secondaryContainer = Color(0xFFE8EDF5);
   static const Color secondaryContainerDark = Color(0xFF3C4758);
   
   // ==========================================================================
   // STATUS COLORS
   // ==========================================================================
   
-  /// Success - Green
-  static const Color success = Color(0xFF2E7D32);
-  static const Color successLight = Color(0xFF4CAF50);
-  static const Color successContainer = Color(0xFFC8E6C9);
-  static const Color successContainerDark = Color(0xFF1B5E20);
+  static const Color success = Color(0xFF10B981);
+  static const Color successLight = Color(0xFF34D399);
+  static const Color successContainer = Color(0xFFD1FAE5);
+  static const Color successContainerDark = Color(0xFF064E3B);
   static const Color onSuccess = Colors.white;
   
-  /// Warning - Amber/Orange
-  static const Color warning = Color(0xFFF57C00);
-  static const Color warningLight = Color(0xFFFFB74D);
-  static const Color warningContainer = Color(0xFFFFE0B2);
-  static const Color warningContainerDark = Color(0xFFE65100);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningLight = Color(0xFFFBBF24);
+  static const Color warningContainer = Color(0xFFFEF3C7);
+  static const Color warningContainerDark = Color(0xFF92400E);
   static const Color onWarning = Colors.white;
   
-  /// Error - Red
-  static const Color error = Color(0xFFD32F2F);
-  static const Color errorLight = Color(0xFFEF5350);
-  static const Color errorContainer = Color(0xFFFFCDD2);
-  static const Color errorContainerDark = Color(0xFF93000A);
+  static const Color error = Color(0xFFEF4444);
+  static const Color errorLight = Color(0xFFF87171);
+  static const Color errorContainer = Color(0xFFFEE2E2);
+  static const Color errorContainerDark = Color(0xFF991B1B);
   static const Color onError = Colors.white;
   
-  /// Info - Blue (lighter than primary)
-  static const Color info = Color(0xFF0288D1);
-  static const Color infoLight = Color(0xFF03A9F4);
-  static const Color infoContainer = Color(0xFFB3E5FC);
-  static const Color infoContainerDark = Color(0xFF01579B);
+  static const Color info = Color(0xFF3B82F6);
+  static const Color infoLight = Color(0xFF60A5FA);
+  static const Color infoContainer = Color(0xFFDBEAFE);
+  static const Color infoContainerDark = Color(0xFF1E3A5F);
   static const Color onInfo = Colors.white;
   
   // ==========================================================================
   // ORDER STATUS COLORS
   // ==========================================================================
   
-  /// Order status: Pending (1)
-  static const Color orderPending = Color(0xFFF57C00); // Orange
-  
-  /// Order status: Confirmed (2)
-  static const Color orderConfirmed = Color(0xFF1976D2); // Blue
-  
-  /// Order status: Preparing (3)
-  static const Color orderPreparing = Color(0xFF7B1FA2); // Purple
-  
-  /// Order status: Out for Delivery (4)
-  static const Color orderOutForDelivery = Color(0xFF303F9F); // Indigo
-  
-  /// Order status: Delivered (5)
-  static const Color orderDelivered = Color(0xFF388E3C); // Green
-  
-  /// Order status: Cancelled (6)
-  static const Color orderCancelled = Color(0xFFD32F2F); // Red
+  static const Color orderPending = Color(0xFFF59E0B);
+  static const Color orderConfirmed = Color(0xFF3B82F6);
+  static const Color orderPreparing = Color(0xFF8B5CF6);
+  static const Color orderOutForDelivery = Color(0xFF6366F1);
+  static const Color orderDelivered = Color(0xFF10B981);
+  static const Color orderCancelled = Color(0xFFEF4444);
   
   // ==========================================================================
-  // NEUTRAL COLORS
+  // NEUTRAL COLORS - LIGHT THEME
   // ==========================================================================
   
-  /// Surface colors - Light theme
-  static const Color surface = Color(0xFFFAFAFA);
-  static const Color surfaceVariant = Color(0xFFE7E0EC);
-  static const Color background = Color(0xFFF5F5F5);
+  static const Color surface = Color(0xFFFFFBFE);
+  static const Color surfaceVariant = Color(0xFFF3F0F7);
+  static const Color background = Color(0xFFF8F6FA);
   
-  /// Surface colors - Dark theme
-  static const Color surfaceDark = Color(0xFF1C1B1F);
-  static const Color surfaceVariantDark = Color(0xFF49454F);
-  static const Color backgroundDark = Color(0xFF121212);
+  static const Color surfaceDark = Color(0xFF1A1A24);
+  static const Color surfaceVariantDark = Color(0xFF2A2A3A);
+  static const Color backgroundDark = Color(0xFF0F0F18);
   
-  /// Outline/Border colors
-  static const Color outline = Color(0xFF79747E);
-  static const Color outlineVariant = Color(0xFFCAC4D0);
-  static const Color outlineDark = Color(0xFF938F99);
-  static const Color outlineVariantDark = Color(0xFF49454F);
+  static const Color outline = Color(0xFFD1D5DB);
+  static const Color outlineVariant = Color(0xFFE5E7EB);
+  static const Color outlineDark = Color(0xFF4B5563);
+  static const Color outlineVariantDark = Color(0xFF374151);
   
-  /// Text colors - Light theme
-  static const Color textPrimary = Color(0xFF1C1B1F);
-  static const Color textSecondary = Color(0xFF49454F);
-  static const Color textTertiary = Color(0xFF79747E);
-  static const Color textDisabled = Color(0xFFCAC4D0);
+  static const Color textPrimary = Color(0xFF111827);
+  static const Color textSecondary = Color(0xFF4B5563);
+  static const Color textTertiary = Color(0xFF9CA3AF);
+  static const Color textDisabled = Color(0xFFD1D5DB);
   
-  /// Text colors - Dark theme
-  static const Color textPrimaryDark = Color(0xFFE6E1E5);
-  static const Color textSecondaryDark = Color(0xFFCAC4D0);
-  static const Color textTertiaryDark = Color(0xFF938F99);
-  static const Color textDisabledDark = Color(0xFF49454F);
+  static const Color textPrimaryDark = Color(0xFFF9FAFB);
+  static const Color textSecondaryDark = Color(0xFFD1D5DB);
+  static const Color textTertiaryDark = Color(0xFF9CA3AF);
+  static const Color textDisabledDark = Color(0xFF4B5563);
   
-  /// Icon colors
-  static const Color iconPrimary = Color(0xFF49454F);
-  static const Color iconSecondary = Color(0xFF79747E);
-  static const Color iconPrimaryDark = Color(0xFFCAC4D0);
-  static const Color iconSecondaryDark = Color(0xFF938F99);
+  static const Color iconPrimary = Color(0xFF374151);
+  static const Color iconSecondary = Color(0xFF6B7280);
+  static const Color iconPrimaryDark = Color(0xFFD1D5DB);
+  static const Color iconSecondaryDark = Color(0xFF9CA3AF);
   
-  /// Divider colors
-  static const Color divider = Color(0xFFE0E0E0);
-  static const Color dividerDark = Color(0xFF2C2C2C);
+  static const Color divider = Color(0xFFF3F4F6);
+  static const Color dividerDark = Color(0xFF2A2A3A);
   
   // ==========================================================================
   // SPECIAL COLORS
   // ==========================================================================
   
-  /// Shimmer/placeholder colors
-  static const Color shimmerBase = Color(0xFFE0E0E0);
-  static const Color shimmerHighlight = Color(0xFFF5F5F5);
-  static const Color shimmerBaseDark = Color(0xFF2C2C2C);
-  static const Color shimmerHighlightDark = Color(0xFF3D3D3D);
+  static const Color shimmerBase = Color(0xFFE5E7EB);
+  static const Color shimmerHighlight = Color(0xFFF9FAFB);
+  static const Color shimmerBaseDark = Color(0xFF374151);
+  static const Color shimmerHighlightDark = Color(0xFF4B5563);
   
-  /// Overlay colors
   static const Color overlay = Color(0x52000000);
-  static const Color overlayLight = Color(0x1F000000);
+  static const Color overlayLight = Color(0x0F000000);
   
-  /// Card background
   static const Color cardBackground = Colors.white;
-  static const Color cardBackgroundDark = Color(0xFF2C2C2C);
+  static const Color cardBackgroundDark = Color(0xFF1E1E2D);
+  
+  // ==========================================================================
+  // GRADIENT DEFINITIONS
+  // ==========================================================================
+  
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
+  );
+  
+  static const LinearGradient accentGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFE2B93B), Color(0xFFF0C75E)],
+  );
+  
+  static const LinearGradient buttonGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1A1A2E), Color(0xFF0F3460)],
+  );
+  
+  static const LinearGradient splashGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF0A0A1A), Color(0xFF1A1A2E), Color(0xFF16213E)],
+  );
+  
+  static const LinearGradient cardGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFFFFFF), Color(0xFFF8F6FA)],
+  );
+  
+  static const LinearGradient cardGradientDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1E1E2D), Color(0xFF2A2A3A)],
+  );
+  
+  static const LinearGradient successGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF10B981), Color(0xFF34D399)],
+  );
   
   // ==========================================================================
   // HELPER METHODS
   // ==========================================================================
   
-  /// Get color for order status
   static Color getOrderStatusColor(int status) {
     switch (status) {
-      case 1:
-        return orderPending;
-      case 2:
-        return orderConfirmed;
-      case 3:
-        return orderPreparing;
-      case 4:
-        return orderOutForDelivery;
-      case 5:
-        return orderDelivered;
-      case 6:
-        return orderCancelled;
-      default:
-        return textTertiary;
+      case 1: return orderPending;
+      case 2: return orderConfirmed;
+      case 3: return orderPreparing;
+      case 4: return orderOutForDelivery;
+      case 5: return orderDelivered;
+      case 6: return orderCancelled;
+      default: return textTertiary;
     }
   }
   
-  /// Get background color for order status (with opacity)
   static Color getOrderStatusBackground(int status) {
-    return getOrderStatusColor(status).withOpacity(0.15);
+    return getOrderStatusColor(status).withAlpha(25);
   }
 }

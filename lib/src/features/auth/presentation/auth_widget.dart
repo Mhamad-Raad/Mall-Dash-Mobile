@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_notifier.dart';
 import 'login_page.dart';
+import 'splash_screen.dart';
 import '../../../core/presentation/main_scaffold.dart';
 
 class AuthWidget extends ConsumerStatefulWidget {
@@ -15,7 +16,6 @@ class _AuthWidgetState extends ConsumerState<AuthWidget> {
   @override
   void initState() {
     super.initState();
-    // Check auth status when the widget initializes
     Future.microtask(() => ref.read(authNotifierProvider.notifier).checkAuthStatus());
   }
 
@@ -23,23 +23,28 @@ class _AuthWidgetState extends ConsumerState<AuthWidget> {
   Widget build(BuildContext context) {
     final authStatus = ref.watch(authNotifierProvider);
 
-    // Use a key that changes with auth status to force complete rebuild
-    // This ensures navigation stack is cleared when logging in/out
-    final widgetKey = ValueKey('auth_${authStatus.name}');
-
-    switch (authStatus) {
-      case AuthStatus.initial:
-        // You can return a splash screen here
-        return Scaffold(
-          key: widgetKey,
-          body: const Center(
-            child: CircularProgressIndicator(),
-          ),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
         );
+      },
+      child: _buildForStatus(authStatus),
+    );
+  }
+
+  Widget _buildForStatus(AuthStatus status) {
+    switch (status) {
+      case AuthStatus.initial:
+        return const SplashScreen(key: ValueKey('splash'));
       case AuthStatus.authenticated:
-        return MainScaffold(key: widgetKey);
+        return const MainScaffold(key: ValueKey('main'));
       case AuthStatus.unauthenticated:
-        return LoginPage(key: widgetKey);
+        return const LoginPage(key: ValueKey('login'));
     }
   }
 }

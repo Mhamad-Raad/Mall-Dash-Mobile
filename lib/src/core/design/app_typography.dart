@@ -1,198 +1,181 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-/// Centralized typography definitions.
-/// Uses Material 3 default font (Roboto).
+/// Premium typography system using Google Fonts Inter.
 abstract final class AppTypography {
+  // ==========================================================================
+  // FONT FAMILY
+  // ==========================================================================
+  
+  static String get fontFamily => GoogleFonts.inter().fontFamily!;
+  
+  static TextStyle get _baseStyle => GoogleFonts.inter();
+  
   // ==========================================================================
   // FONT WEIGHTS
   // ==========================================================================
   
+  static const FontWeight thin = FontWeight.w100;
+  static const FontWeight extraLight = FontWeight.w200;
   static const FontWeight light = FontWeight.w300;
   static const FontWeight regular = FontWeight.w400;
   static const FontWeight medium = FontWeight.w500;
   static const FontWeight semiBold = FontWeight.w600;
   static const FontWeight bold = FontWeight.w700;
+  static const FontWeight extraBold = FontWeight.w800;
+  static const FontWeight black = FontWeight.w900;
   
   // ==========================================================================
   // FONT SIZES
   // ==========================================================================
   
-  /// Caption/Overline: 10px
   static const double sizeCaption = 10.0;
-  
-  /// Label small: 11px
   static const double sizeLabelSm = 11.0;
-  
-  /// Label: 12px
   static const double sizeLabel = 12.0;
-  
-  /// Body small: 13px
   static const double sizeBodySm = 13.0;
-  
-  /// Body: 14px
   static const double sizeBody = 14.0;
-  
-  /// Body large: 16px
   static const double sizeBodyLg = 16.0;
-  
-  /// Title small: 18px
   static const double sizeTitleSm = 18.0;
-  
-  /// Title: 20px
   static const double sizeTitle = 20.0;
-  
-  /// Title large: 22px
   static const double sizeTitleLg = 22.0;
-  
-  /// Headline small: 24px
   static const double sizeHeadlineSm = 24.0;
-  
-  /// Headline: 28px
   static const double sizeHeadline = 28.0;
-  
-  /// Headline large: 32px
   static const double sizeHeadlineLg = 32.0;
-  
-  /// Display small: 36px
   static const double sizeDisplaySm = 36.0;
-  
-  /// Display: 45px
   static const double sizeDisplay = 45.0;
+  
+  // ==========================================================================
+  // LETTER SPACING
+  // ==========================================================================
+  
+  static const double trackingTight = -0.5;
+  static const double trackingNormal = 0.0;
+  static const double trackingWide = 0.5;
+  static const double trackingExtraWide = 1.5;
+  
+  // ==========================================================================
+  // LINE HEIGHTS
+  // ==========================================================================
+  
+  static const double heightTight = 1.2;
+  static const double heightNormal = 1.5;
+  static const double heightRelaxed = 1.75;
   
   // ==========================================================================
   // TEXT STYLES - Light Theme
   // ==========================================================================
   
-  /// Caption text (smallest)
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => _baseStyle.copyWith(
     fontSize: sizeCaption,
     fontWeight: regular,
     color: AppColors.textTertiary,
+    letterSpacing: trackingWide,
   );
   
-  /// Label text (chips, badges)
-  static const TextStyle label = TextStyle(
+  static TextStyle get label => _baseStyle.copyWith(
     fontSize: sizeLabel,
     fontWeight: medium,
     color: AppColors.textSecondary,
+    letterSpacing: trackingWide,
   );
   
-  /// Label text bold
-  static const TextStyle labelBold = TextStyle(
+  static TextStyle get labelBold => _baseStyle.copyWith(
     fontSize: sizeLabel,
     fontWeight: bold,
     color: AppColors.textSecondary,
+    letterSpacing: trackingWide,
   );
   
-  /// Body small text
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle get bodySmall => _baseStyle.copyWith(
     fontSize: sizeBodySm,
     fontWeight: regular,
     color: AppColors.textSecondary,
   );
   
-  /// Body text (default)
-  static const TextStyle body = TextStyle(
+  static TextStyle get body => _baseStyle.copyWith(
     fontSize: sizeBody,
     fontWeight: regular,
     color: AppColors.textPrimary,
   );
   
-  /// Body text bold
-  static const TextStyle bodyBold = TextStyle(
+  static TextStyle get bodyBold => _baseStyle.copyWith(
     fontSize: sizeBody,
-    fontWeight: bold,
+    fontWeight: semiBold,
     color: AppColors.textPrimary,
   );
   
-  /// Body large text
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => _baseStyle.copyWith(
     fontSize: sizeBodyLg,
     fontWeight: regular,
     color: AppColors.textPrimary,
   );
   
-  /// Body large text bold
-  static const TextStyle bodyLargeBold = TextStyle(
+  static TextStyle get bodyLargeBold => _baseStyle.copyWith(
     fontSize: sizeBodyLg,
-    fontWeight: bold,
+    fontWeight: semiBold,
     color: AppColors.textPrimary,
   );
   
-  /// Title small text
-  static const TextStyle titleSmall = TextStyle(
+  static TextStyle get titleSmall => _baseStyle.copyWith(
     fontSize: sizeTitleSm,
     fontWeight: semiBold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
   );
   
-  /// Title text
-  static const TextStyle title = TextStyle(
+  static TextStyle get title => _baseStyle.copyWith(
     fontSize: sizeTitle,
     fontWeight: semiBold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
   );
   
-  /// Title large text
-  static const TextStyle titleLarge = TextStyle(
+  static TextStyle get titleLarge => _baseStyle.copyWith(
     fontSize: sizeTitleLg,
     fontWeight: bold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
   );
   
-  /// Headline small text
-  static const TextStyle headlineSmall = TextStyle(
+  static TextStyle get headlineSmall => _baseStyle.copyWith(
     fontSize: sizeHeadlineSm,
     fontWeight: bold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
   );
   
-  /// Headline text
-  static const TextStyle headline = TextStyle(
+  static TextStyle get headline => _baseStyle.copyWith(
     fontSize: sizeHeadline,
     fontWeight: bold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
   );
   
-  /// Display text (largest)
-  static const TextStyle display = TextStyle(
-    fontSize: sizeDisplay,
-    fontWeight: bold,
+  static TextStyle get headlineLarge => _baseStyle.copyWith(
+    fontSize: sizeHeadlineLg,
+    fontWeight: extraBold,
     color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
+  );
+  
+  static TextStyle get display => _baseStyle.copyWith(
+    fontSize: sizeDisplay,
+    fontWeight: black,
+    color: AppColors.textPrimary,
+    letterSpacing: trackingTight,
+    height: heightTight,
   );
   
   // ==========================================================================
   // HELPER METHODS
   // ==========================================================================
   
-  /// Create a text style with primary color
-  static TextStyle primary(TextStyle base) {
-    return base.copyWith(color: AppColors.primary);
-  }
-  
-  /// Create a text style with secondary color
-  static TextStyle secondary(TextStyle base) {
-    return base.copyWith(color: AppColors.textSecondary);
-  }
-  
-  /// Create a text style with tertiary/hint color
-  static TextStyle tertiary(TextStyle base) {
-    return base.copyWith(color: AppColors.textTertiary);
-  }
-  
-  /// Create a text style with success color
-  static TextStyle success(TextStyle base) {
-    return base.copyWith(color: AppColors.success);
-  }
-  
-  /// Create a text style with error color
-  static TextStyle error(TextStyle base) {
-    return base.copyWith(color: AppColors.error);
-  }
-  
-  /// Create a text style with warning color
-  static TextStyle warning(TextStyle base) {
-    return base.copyWith(color: AppColors.warning);
-  }
+  static TextStyle primary(TextStyle base) => base.copyWith(color: AppColors.primary);
+  static TextStyle secondary(TextStyle base) => base.copyWith(color: AppColors.textSecondary);
+  static TextStyle tertiary(TextStyle base) => base.copyWith(color: AppColors.textTertiary);
+  static TextStyle success(TextStyle base) => base.copyWith(color: AppColors.success);
+  static TextStyle error(TextStyle base) => base.copyWith(color: AppColors.error);
+  static TextStyle warning(TextStyle base) => base.copyWith(color: AppColors.warning);
+  static TextStyle gold(TextStyle base) => base.copyWith(color: AppColors.accent);
 }
